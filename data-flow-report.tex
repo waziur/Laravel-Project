@@ -1,0 +1,496 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\geometry{margin=1in}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.5em}
+
+\title{\textbf{Professional Data Flow Report}\\Startup Laravel Application}
+\author{Prepared for the current codebase}
+\date{May 19, 2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Executive Summary}
+
+This application is a server-rendered Laravel 12 project. The frontend is primarily Blade templates under \path{resources/views}, supported by static assets under \path{public}. Browser requests enter through Laravel's HTTP kernel, are matched in \path{routes/web.php}, are handled by controller methods in \path{app/Http/Controllers}, and use Eloquent models in \path{app/Models} to read from or write to the database.
+
+The application has four main business data areas:
+
+\begin{itemize}
+    \item \textbf{Users}: registration, login, dashboards, admin access, and seeded demo accounts.
+    \item \textbf{Services}: public service listings and admin-managed service records.
+    \item \textbf{Quote requests}: public quote form submissions that admins can review.
+    \item \textbf{Contact messages}: public contact form submissions that admins can review.
+\end{itemize}
+
+The data flow is a classic Laravel MVC flow:
+
+\begin{verbatim}
+Browser
+  -> public/index.php
+  -> bootstrap/app.php
+  -> routes/web.php
+  -> middleware
+  -> controller
+  -> Eloquent model/query
+  -> database table
+  -> controller response
+  -> Blade view or redirect
+  -> Browser
+\end{verbatim}
+
+\section{Current File Context}
+
+Your active file is:
+
+\begin{verbatim}
+database/seeders/DatabaseSeeder.php
+\end{verbatim}
+
+This file is part of the \textbf{seed-time data flow}, not the normal browser request flow. It runs when a command such as \path{php artisan db:seed} or \path{php artisan migrate:fresh --seed} executes. Its current responsibility is to create or update two demo accounts:
+
+\begin{itemize}
+    \item \path{admin@example.com} as an admin user.
+    \item \path{user@example.com} as a regular user.
+\end{itemize}
+
+From this file, the next important code path is:
+
+\begin{verbatim}
+php artisan db:seed
+  -> database/seeders/DatabaseSeeder.php
+  -> App\Models\User
+  -> users table
+\end{verbatim}
+
+\path{DatabaseSeeder.php} calls \path{User::updateOrCreate}. The \path{User} model defines mass-assignable fields, casts the password using Laravel's hashed cast, casts \path{is_admin} to a boolean, and provides helper methods such as \path{isAdmin()}, \path{roleName()}, and \path{roleSlug()}.
+
+\section{Application Entry Points}
+
+\subsection{HTTP Entry Point}
+
+All web requests enter the application through:
+
+\begin{verbatim}
+public/index.php
+\end{verbatim}
+
+That file loads Composer autoloading, boots Laravel from \path{bootstrap/app.php}, captures the incoming request, and asks Laravel to handle it.
+
+\subsection{Application Bootstrap}
+
+\path{bootstrap/app.php} registers the web routes from \path{routes/web.php} and defines the custom middleware alias:
+
+\begin{verbatim}
+'admin' => App\Http\Middleware\EnsureUserIsAdmin::class
+\end{verbatim}
+
+That alias is used by admin routes to ensure the logged-in user has admin privileges.
+
+\subsection{Route Map}
+
+The primary route definitions live in:
+
+\begin{verbatim}
+routes/web.php
+\end{verbatim}
+
+The route file organizes the application into four major groups:
+
+\begin{itemize}
+    \item Public frontend pages handled by \path{FrontendController}.
+    \item Guest-only login and registration pages handled by \path{AuthController}.
+    \item Authenticated dashboard routes handled by \path{DashboardController}.
+    \item Authenticated admin routes handled by \path{AdminController} and protected by the \path{admin} middleware.
+\end{itemize}
+
+\section{File Responsibility Map}
+
+\begin{longtable}{|p{0.20\textwidth}|p{0.33\textwidth}|p{0.39\textwidth}|}
+\hline
+\textbf{Layer} & \textbf{Main files} & \textbf{Responsibility} \\
+\hline
+HTTP entry & \path{public/index.php}, \path{bootstrap/app.php} & Boot Laravel, load routes, register middleware, and handle incoming requests. \\
+\hline
+Routing & \path{routes/web.php} & Map URLs and HTTP methods to controller methods. \\
+\hline
+Public frontend controller & \path{app/Http/Controllers/FrontendController.php} & Render public pages, load active services, validate quote/contact forms, and save public submissions. \\
+\hline
+Authentication controller & \path{app/Http/Controllers/AuthController.php} & Show login/register forms, authenticate users, create users, start sessions, and log users out. \\
+\hline
+Dashboard controller & \path{app/Http/Controllers/DashboardController.php} & Redirect authenticated users to the correct panel and render the user dashboard. \\
+\hline
+Admin controller & \path{app/Http/Controllers/AdminController.php} & Read dashboard metrics, list users/quotes/messages, and create/update/delete services. \\
+\hline
+Admin middleware & \path{app/Http/Middleware/EnsureUserIsAdmin.php} & Block non-admin users from admin routes and redirect them to the user dashboard. \\
+\hline
+Models & \path{app/Models/User.php}, \path{Service.php}, \path{QuoteRequest.php}, \path{ContactMessage.php} & Represent database tables and define fillable fields, casts, scopes, and helper methods. \\
+\hline
+Views & \path{resources/views} & Render public pages, forms, dashboard panels, admin tables, and shared layouts. \\
+\hline
+Database schema & \path{database/migrations} & Define the database tables for users, sessions, cache, jobs, services, quote requests, and contact messages. \\
+\hline
+Seed data & \path{database/seeders/DatabaseSeeder.php} & Insert or update demo admin and user accounts. \\
+\hline
+Tests & \path{tests/Feature} & Verify page rendering, quote/contact storage, authentication, admin access, and service management. \\
+\hline
+\end{longtable}
+
+\section{Database Configuration and Schema}
+
+The current local environment uses:
+
+\begin{itemize}
+    \item \path{DB_CONNECTION=mysql}
+    \item \path{DB_DATABASE=startup}
+    \item \path{SESSION_DRIVER=database}
+    \item \path{CACHE_STORE=database}
+    \item \path{QUEUE_CONNECTION=database}
+\end{itemize}
+
+Laravel reads those values through \path{config/database.php}, \path{config/session.php}, \path{config/cache.php}, and \path{config/queue.php}. Because sessions, cache, and queue are configured for database-backed drivers, the default Laravel migrations for sessions, cache, and jobs are also relevant to runtime behavior.
+
+\subsection{Business Tables}
+
+\begin{longtable}{|p{0.22\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}|}
+\hline
+\textbf{Table} & \textbf{Created/modified by} & \textbf{Purpose} \\
+\hline
+\path{users} & \path{0001_01_01_000000_create_users_table.php}, \path{2026_05_18_000000_add_role_to_users_table.php}, \path{2026_05_18_020000_add_is_admin_to_users_table.php} & Stores registered users, passwords, roles, and the boolean admin flag. \\
+\hline
+\path{services} & \path{2026_05_19_000000_create_services_table.php} & Stores service title, image path/URL, short description, and active/inactive state. \\
+\hline
+\path{quote_requests} & \path{2026_05_18_010000_create_quote_requests_table.php} & Stores submitted quote requests from the public quote form. \\
+\hline
+\path{contact_messages} & \path{2026_05_18_010100_create_contact_messages_table.php} & Stores messages from the public contact form. \\
+\hline
+\end{longtable}
+
+\section{Frontend to Database to Frontend Flow}
+
+\subsection{Public Page Read Flow}
+
+Public pages such as Home, About, Services, Quote, and Contact are defined in \path{routes/web.php} and handled by \path{FrontendController}.
+
+\begin{verbatim}
+Browser GET /service
+  -> routes/web.php
+  -> FrontendController@service
+  -> FrontendController::pageData()
+  -> Service::active()->oldest()->get()
+  -> services table
+  -> resources/views/service.blade.php
+  -> resources/views/partials/services-grid.blade.php
+  -> Browser receives HTML
+\end{verbatim}
+
+The important detail is that \path{FrontendController::pageData()} always attaches \path{activeServices}. The \path{services-grid.blade.php} partial uses those records to render the public services. The \path{quote-form.blade.php} partial also uses the active service titles to populate the quote form dropdown.
+
+\subsection{Quote Request Write Flow}
+
+The quote form begins in:
+
+\begin{verbatim}
+resources/views/partials/quote-form.blade.php
+\end{verbatim}
+
+That form posts to the named route \path{quote.store}, which maps to \path{POST /quote}.
+
+\begin{verbatim}
+Browser submits quote form
+  -> POST /quote
+  -> routes/web.php route name quote.store
+  -> FrontendController@storeQuote
+  -> request validation
+  -> QuoteRequest::create($validated)
+  -> quote_requests table
+  -> redirect back with success message
+  -> quote page renders success alert
+\end{verbatim}
+
+Validated fields are \path{name}, \path{email}, \path{service}, and \path{message}. The \path{QuoteRequest} model allows those fields through its \path{$fillable} array. Admin users can later read the stored data through:
+
+\begin{verbatim}
+GET /admin/quotes
+  -> AdminController@quotes
+  -> QuoteRequest::query()->latest()->paginate(10)
+  -> resources/views/admin/quotes.blade.php
+\end{verbatim}
+
+The admin dashboard also reads quote data through \path{QuoteRequest::count()} and \path{QuoteRequest::latest()->take(4)->get()}.
+
+\subsection{Contact Message Write Flow}
+
+The contact form begins in:
+
+\begin{verbatim}
+resources/views/contact.blade.php
+\end{verbatim}
+
+It posts to the named route \path{contact.send}, which maps to \path{POST /contact}.
+
+\begin{verbatim}
+Browser submits contact form
+  -> POST /contact
+  -> routes/web.php route name contact.send
+  -> FrontendController@sendContact
+  -> request validation
+  -> ContactMessage::create($validated)
+  -> contact_messages table
+  -> redirect back with success message
+  -> contact page renders success alert
+\end{verbatim}
+
+Validated fields are \path{name}, \path{email}, \path{subject}, and \path{message}. Admin users can later read the stored data through:
+
+\begin{verbatim}
+GET /admin/contacts
+  -> AdminController@contacts
+  -> ContactMessage::query()->latest()->paginate(10)
+  -> resources/views/admin/contacts.blade.php
+\end{verbatim}
+
+The admin dashboard also reads contact data through \path{ContactMessage::count()} and \path{ContactMessage::latest()->take(4)->get()}.
+
+\subsection{Registration, Login, and Session Flow}
+
+Registration starts in:
+
+\begin{verbatim}
+resources/views/auth/register.blade.php
+\end{verbatim}
+
+The form posts to \path{register.store}, which maps to \path{POST /register}.
+
+\begin{verbatim}
+Browser submits registration form
+  -> POST /register
+  -> AuthController@register
+  -> validate name, email, password, password_confirmation
+  -> User::create(...)
+  -> users table
+  -> Auth::login($user)
+  -> session regenerate
+  -> sessions table
+  -> redirect to /user/dashboard
+\end{verbatim}
+
+The \path{User} model hashes passwords through the \path{password => hashed} cast. New registered users are created with \path{role = user} and \path{is_admin = false}.
+
+Login starts in:
+
+\begin{verbatim}
+resources/views/auth/login.blade.php
+\end{verbatim}
+
+The form posts to \path{login.store}, which maps to \path{POST /login}.
+
+\begin{verbatim}
+Browser submits login form
+  -> POST /login
+  -> AuthController@login
+  -> validate email and password
+  -> Auth::attempt(...)
+  -> users table lookup and password verification
+  -> session regenerate
+  -> redirect based on User::isAdmin()
+\end{verbatim}
+
+If \path{is_admin} is true, the user goes to \path{admin.dashboard}. Otherwise, the user goes to \path{user.dashboard}. Logout posts to \path{POST /logout}, invalidates the session, regenerates the CSRF token, and redirects to the login page.
+
+\subsection{User Dashboard Read Flow}
+
+After login, regular users reach:
+
+\begin{verbatim}
+GET /user/dashboard
+  -> DashboardController@user
+  -> request()->user()
+  -> resources/views/dashboard/user.blade.php
+\end{verbatim}
+
+The dashboard displays data already loaded for the authenticated user, such as name, email, role, and account creation date. It also builds quick links to Quote, Services, and Contact pages.
+
+\subsection{Admin Dashboard Read Flow}
+
+Admin users reach:
+
+\begin{verbatim}
+GET /admin/dashboard
+  -> auth middleware
+  -> admin middleware
+  -> EnsureUserIsAdmin
+  -> AdminController@dashboard
+  -> users, quote_requests, contact_messages, services queries
+  -> resources/views/admin/dashboard.blade.php
+\end{verbatim}
+
+\path{AdminController@dashboard} collects counts and latest records from the main business tables, shapes the data into arrays, and passes it to the Blade view. The dashboard is a read-heavy aggregation layer.
+
+\subsection{Admin Service Management Flow}
+
+Services are the main admin-managed content type.
+
+\begin{verbatim}
+Admin opens service manager
+  -> GET /admin/services
+  -> AdminController@services
+  -> Service::query()
+  -> optional search filter
+  -> latest()->paginate(10)
+  -> resources/views/admin/services/index.blade.php
+\end{verbatim}
+
+Creating a service:
+
+\begin{verbatim}
+Admin submits service form
+  -> POST /admin/services
+  -> AdminController@storeService
+  -> validatedServiceData()
+  -> Service::create(...)
+  -> services table
+  -> redirect to admin.services with status message
+\end{verbatim}
+
+Updating a service:
+
+\begin{verbatim}
+Admin submits edit form
+  -> PUT /admin/services/{service}
+  -> Laravel route model binding resolves Service
+  -> AdminController@updateService
+  -> validatedServiceData()
+  -> $service->update(...)
+  -> services table
+  -> redirect to admin.services with status message
+\end{verbatim}
+
+Deleting a service:
+
+\begin{verbatim}
+Admin confirms delete
+  -> DELETE /admin/services/{service}
+  -> Laravel route model binding resolves Service
+  -> AdminController@destroyService
+  -> $service->delete()
+  -> services table
+  -> redirect to admin.services with status message
+\end{verbatim}
+
+The public frontend only displays services where \path{is_active = true}, because it uses the \path{Service::active()} scope.
+
+\section{Back-and-Forth Data Movement}
+
+\subsection{How Data Goes From Frontend to Database}
+
+The user fills in a Blade-rendered form in the browser. The form sends a POST, PUT, or DELETE request with a CSRF token. Laravel routes the request to a controller. The controller validates the request and passes only validated data into an Eloquent model. The model writes to the appropriate table using mass-assignment rules from \path{$fillable}.
+
+Examples:
+
+\begin{itemize}
+    \item Quote form data becomes a row in \path{quote_requests}.
+    \item Contact form data becomes a row in \path{contact_messages}.
+    \item Registration form data becomes a row in \path{users}.
+    \item Admin service form data becomes a row in \path{services} or updates an existing row.
+\end{itemize}
+
+\subsection{How Data Comes Back From Database to Frontend}
+
+Controllers query Eloquent models and pass the results to Blade views. Blade templates loop over collections, render tables or cards, and return complete HTML to the browser. Redirect responses carry short-lived success/status messages through the session.
+
+Examples:
+
+\begin{itemize}
+    \item \path{Service::active()->oldest()->get()} feeds public service cards and quote service options.
+    \item \path{QuoteRequest::latest()->paginate(10)} feeds the admin quote table.
+    \item \path{ContactMessage::latest()->paginate(10)} feeds the admin contact table.
+    \item \path{User::latest()->paginate(10)} feeds the admin user directory.
+    \item \path{Auth::attempt()} reads the \path{users} table and creates an authenticated session.
+\end{itemize}
+
+\section{Route-to-Data Matrix}
+
+\begin{longtable}{|p{0.18\textwidth}|p{0.23\textwidth}|p{0.27\textwidth}|p{0.24\textwidth}|}
+\hline
+\textbf{Request} & \textbf{Controller method} & \textbf{Data access} & \textbf{Response} \\
+\hline
+\path{GET /} and public pages & \path{FrontendController} page methods & Reads active services through \path{Service::active()} & Public Blade views using \path{layouts/master.blade.php} \\
+\hline
+\path{POST /quote} & \path{FrontendController@storeQuote} & Creates \path{QuoteRequest} row & Redirect back with success message \\
+\hline
+\path{POST /contact} & \path{FrontendController@sendContact} & Creates \path{ContactMessage} row & Redirect back with success message \\
+\hline
+\path{POST /register} & \path{AuthController@register} & Creates \path{User} row and database session & Redirect to user dashboard \\
+\hline
+\path{POST /login} & \path{AuthController@login} & Reads \path{users}; writes/regenerates session & Redirect to admin or user dashboard \\
+\hline
+\path{GET /user/dashboard} & \path{DashboardController@user} & Reads authenticated user from session/auth guard & User panel view \\
+\hline
+\path{GET /admin/dashboard} & \path{AdminController@dashboard} & Counts/latest records from users, quotes, messages, services & Admin dashboard view \\
+\hline
+\path{GET /admin/services} & \path{AdminController@services} & Reads/searches/paginates \path{services} & Service manager table \\
+\hline
+\path{POST /admin/services} & \path{AdminController@storeService} & Creates \path{Service} row & Redirect to service manager \\
+\hline
+\path{PUT /admin/services/{service}} & \path{AdminController@updateService} & Updates resolved \path{Service} row & Redirect to service manager \\
+\hline
+\path{DELETE /admin/services/{service}} & \path{AdminController@destroyService} & Deletes resolved \path{Service} row & Redirect to service manager \\
+\hline
+\path{GET /admin/quotes} & \path{AdminController@quotes} & Reads/searches/paginates \path{quote_requests} & Quote request table \\
+\hline
+\path{GET /admin/contacts} & \path{AdminController@contacts} & Reads/searches/paginates \path{contact_messages} & Contact message table \\
+\hline
+\path{GET /admin/users} & \path{AdminController@users} & Reads/searches/paginates \path{users} & User directory table \\
+\hline
+\end{longtable}
+
+\section{Validation and Access Control}
+
+The application uses several Laravel protections and conventions:
+
+\begin{itemize}
+    \item \textbf{CSRF protection}: Blade forms include \path{@csrf} for state-changing requests.
+    \item \textbf{Request validation}: Controllers validate required fields, email format, string lengths, and password confirmation before database writes.
+    \item \textbf{Mass assignment control}: Models define \path{$fillable} so only approved fields can be mass-assigned.
+    \item \textbf{Password hashing}: \path{User} casts \path{password} as \path{hashed}, so created passwords are hashed automatically.
+    \item \textbf{Authentication middleware}: Dashboard and admin routes require logged-in users.
+    \item \textbf{Admin middleware}: \path{EnsureUserIsAdmin} redirects non-admin users away from the admin area.
+    \item \textbf{Route model binding}: Admin service edit/update/delete routes resolve \path{Service $service} automatically from the route parameter.
+\end{itemize}
+
+\section{Important Observations}
+
+\begin{itemize}
+    \item The current active file, \path{DatabaseSeeder.php}, is used for initial/demo data and does not run during normal frontend requests.
+    \item The application is currently server-rendered; there is no separate JSON API layer for the public flows.
+    \item Public service content is database-driven through the \path{services} table.
+    \item Quote requests and contact messages are write-only from the public frontend and read-only from the admin panel.
+    \item The \path{users} table has both \path{role} and \path{is_admin}. Runtime authorization depends on \path{is_admin} through \path{User::isAdmin()}.
+    \item The search form in \path{layouts/master.blade.php} submits a \path{q} parameter to \path{/service}, but \path{FrontendController@service} currently does not apply that parameter to filter public services.
+    \item Initial service records are inserted inside the \path{services} migration, while demo users are inserted through \path{DatabaseSeeder.php}.
+\end{itemize}
+
+\section{Conclusion}
+
+The codebase follows a clear Laravel MVC data flow. Browser requests enter through \path{public/index.php}, routes direct them to controllers, controllers validate and coordinate data access, Eloquent models communicate with MySQL tables, and Blade templates render the returned data back to the user. The admin panel acts as the main back-office read/manage interface, while the public website collects quote and contact submissions and displays active service records.
+
+\end{document}
