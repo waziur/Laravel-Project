@@ -13,15 +13,15 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/feature', 'feature')->name('feature');
     Route::get('/team', 'team')->name('team');
     Route::get('/testimonial', 'testimonial')->name('testimonial');
-    Route::get('/quote', 'quote')->name('quote');
+    Route::get('/booking', 'booking')->name('booking');
     Route::get('/contact', 'contact')->name('contact');
     Route::post('/contact', 'sendContact')->name('contact.send');
 });
 
 Route::controller(FrontendController::class)
-    ->middleware('quote.auth')
+    ->middleware('booking.auth')
     ->group(function () {
-        Route::post('/quote', 'storeQuote')->name('quote.store');
+        Route::post('/booking', 'storeBooking')->name('booking.store');
     });
 
 Route::middleware('guest')->group(function () {
@@ -38,6 +38,7 @@ Route::post('/logout', [AuthController::class, 'logout'])
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'redirect'])->name('dashboard');
     Route::get('/user/dashboard', [DashboardController::class, 'user'])->name('user.dashboard');
+    Route::get('/user/bookings', [DashboardController::class, 'bookings'])->name('user.bookings');
 
     Route::prefix('admin')
         ->name('admin.')
@@ -45,19 +46,14 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
             Route::get('/users', [AdminController::class, 'users'])->name('users');
+            Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
+            Route::patch('/bookings/{booking}/status', [AdminController::class, 'updateBookingStatus'])->name('bookings.status');
             Route::get('/services', [AdminController::class, 'services'])->name('services');
             Route::get('/services/create', [AdminController::class, 'createService'])->name('services.create');
             Route::post('/services', [AdminController::class, 'storeService'])->name('services.store');
             Route::get('/services/{service}/edit', [AdminController::class, 'editService'])->name('services.edit');
             Route::put('/services/{service}', [AdminController::class, 'updateService'])->name('services.update');
             Route::delete('/services/{service}', [AdminController::class, 'destroyService'])->name('services.destroy');
-            Route::get('/quotes', [AdminController::class, 'quotes'])->name('quotes');
-            Route::get('/quotes/create', [AdminController::class, 'createQuote'])->name('quotes.create');
-            Route::post('/quotes', [AdminController::class, 'storeQuote'])->name('quotes.store');
-            Route::get('/quotes/{quote}/edit', [AdminController::class, 'editQuote'])->name('quotes.edit');
-            Route::put('/quotes/{quote}', [AdminController::class, 'updateQuote'])->name('quotes.update');
-            Route::patch('/quotes/{quote}/approval', [AdminController::class, 'updateQuoteApproval'])->name('quotes.approval');
-            Route::delete('/quotes/{quote}', [AdminController::class, 'destroyQuote'])->name('quotes.destroy');
             Route::get('/contacts', [AdminController::class, 'contacts'])->name('contacts');
         });
 });
@@ -68,5 +64,6 @@ Route::redirect('/service.html', '/service', 301);
 Route::redirect('/feature.html', '/feature', 301);
 Route::redirect('/team.html', '/team', 301);
 Route::redirect('/testimonial.html', '/testimonial', 301);
-Route::redirect('/quote.html', '/quote', 301);
+Route::redirect('/quote', '/booking', 301);
+Route::redirect('/quote.html', '/booking', 301);
 Route::redirect('/contact.html', '/contact', 301);

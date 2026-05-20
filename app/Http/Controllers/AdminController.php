@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Booking;
 use App\Models\ContactMessage;
-use App\Models\QuoteRequest;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -17,17 +18,17 @@ class AdminController extends Controller
         $totalUsers = User::count();
         $adminUsers = User::where('is_admin', true)->count();
         $regularUsers = User::where('is_admin', false)->count();
-        $quoteRequests = QuoteRequest::count();
+        $bookingRequests = Booking::count();
         $contactMessages = ContactMessage::count();
         $activeServices = Service::active()->count();
         $latestUsers = User::latest()->take(6)->get();
-        $latestQuotes = QuoteRequest::latest()->take(4)->get();
+        $latestBookings = Booking::with('user')->latest()->take(4)->get();
         $latestMessages = ContactMessage::latest()->take(4)->get();
 
         $dashboardBars = [
             ['label' => 'Users', 'value' => $totalUsers, 'tone' => 'tone-cyan'],
             ['label' => 'Admins', 'value' => $adminUsers, 'tone' => 'tone-green'],
-            ['label' => 'Quotes', 'value' => $quoteRequests, 'tone' => 'tone-amber'],
+            ['label' => 'Bookings', 'value' => $bookingRequests, 'tone' => 'tone-amber'],
             ['label' => 'Messages', 'value' => $contactMessages, 'tone' => 'tone-rose'],
         ];
 
@@ -47,12 +48,12 @@ class AdminController extends Controller
                 'tone' => 'tone-cyan',
                 'created_at' => $user->created_at,
             ]))
-            ->concat($latestQuotes->map(fn (QuoteRequest $quote) => [
-                'title' => $quote->name,
-                'meta' => 'Quote request for ' . $quote->service,
-                'icon' => 'fa-file-signature',
+            ->concat($latestBookings->map(fn (Booking $booking) => [
+                'title' => $booking->name,
+                'meta' => 'Booking for ' . $booking->service . ' is ' . strtolower($booking->statusLabel()),
+                'icon' => 'fa-calendar-check',
                 'tone' => 'tone-amber',
-                'created_at' => $quote->created_at,
+                'created_at' => $booking->created_at,
             ]))
             ->concat($latestMessages->map(fn (ContactMessage $message) => [
                 'title' => $message->name,
@@ -90,11 +91,11 @@ class AdminController extends Controller
                     'note' => 'Regular users',
                 ],
                 [
-                    'label' => 'Quote Requests',
-                    'value' => $quoteRequests,
-                    'icon' => 'fa-file-signature',
+                    'label' => 'Bookings',
+                    'value' => $bookingRequests,
+                    'icon' => 'fa-calendar-check',
                     'tone' => 'warning',
-                    'note' => 'Service inquiries',
+                    'note' => 'Customer booking requests',
                 ],
                 [
                     'label' => 'Messages',
@@ -184,95 +185,53 @@ class AdminController extends Controller
             ->with('status', 'Service deleted successfully.');
     }
 
-    public function quotes(Request $request): View
+    public function bookings(Request $request): View
     {
         $search = $request->string('search')->trim()->toString();
         $status = $request->string('status')->trim()->toString();
-        $status = in_array($status, ['approved', 'pending'], true) ? $status : '';
+        $status = in_array($status, array_keys(Booking::statuses()), true) ? $status : '';
 
-        $quotes = QuoteRequest::query()
+        $bookings = Booking::with('user')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
                         ->orWhere('service', 'like', "%{$search}%")
-                        ->orWhere('message', 'like', "%{$search}%");
+                        ->orWhere('message', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($query) use ($search) {
+                            $query->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
                 });
             })
-            ->when($status === 'approved', fn ($query) => $query->approved())
-            ->when($status === 'pending', fn ($query) => $query->pending())
+            ->when($status !== '', fn ($query) => $query->status($status))
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.quotes', [
-            'pageTitle' => 'Quote Requests',
-            'quotes' => $quotes,
+        return view('admin.bookings', [
+            'pageTitle' => 'Bookings',
+            'bookings' => $bookings,
             'search' => $search,
             'status' => $status,
+            'statuses' => Booking::statuses(),
         ]);
     }
 
-    public function createQuote(): View
-    {
-        return view('admin.quotes.create', [
-            'pageTitle' => 'Add Quote Request',
-            'quote' => new QuoteRequest(['is_approved' => false]),
-            'serviceOptions' => $this->quoteServiceOptions(),
-        ]);
-    }
-
-    public function storeQuote(Request $request): RedirectResponse
-    {
-        QuoteRequest::create($this->validatedQuoteData($request));
-
-        return redirect()
-            ->route('admin.quotes')
-            ->with('status', 'Quote request created successfully.');
-    }
-
-    public function editQuote(QuoteRequest $quote): View
-    {
-        return view('admin.quotes.edit', [
-            'pageTitle' => 'Edit Quote Request',
-            'quote' => $quote,
-            'serviceOptions' => $this->quoteServiceOptions($quote->service),
-        ]);
-    }
-
-    public function updateQuote(Request $request, QuoteRequest $quote): RedirectResponse
-    {
-        $quote->update($this->validatedQuoteData($request));
-
-        return redirect()
-            ->route('admin.quotes')
-            ->with('status', 'Quote request updated successfully.');
-    }
-
-    public function updateQuoteApproval(Request $request, QuoteRequest $quote): RedirectResponse
+    public function updateBookingStatus(Request $request, Booking $booking): RedirectResponse
     {
         $validated = $request->validate([
-            'is_approved' => ['required', 'boolean'],
+            'status' => ['required', Rule::in(array_keys(Booking::statuses()))],
         ]);
 
-        $quote->update([
-            'is_approved' => (bool) $validated['is_approved'],
+        $booking->update([
+            'status' => $validated['status'],
         ]);
 
         return redirect()
-            ->route('admin.quotes')
-            ->with('status', $quote->is_approved
-                ? 'Quote request approved and now visible on the homepage.'
-                : 'Quote request moved back to pending.');
-    }
-
-    public function destroyQuote(QuoteRequest $quote): RedirectResponse
-    {
-        $quote->delete();
-
-        return redirect()
-            ->route('admin.quotes')
-            ->with('status', 'Quote request deleted successfully.');
+            ->route('admin.bookings')
+            ->with('status', 'Booking status updated to ' . strtolower($booking->statusLabel()) . '.');
     }
 
     public function contacts(Request $request): View
@@ -342,7 +301,7 @@ class AdminController extends Controller
             ['label' => 'Features', 'url' => route('feature'), 'icon' => 'fa-star'],
             ['label' => 'Team', 'url' => route('team'), 'icon' => 'fa-users-cog'],
             ['label' => 'Testimonials', 'url' => route('testimonial'), 'icon' => 'fa-comment-dots'],
-            ['label' => 'Quote', 'url' => route('quote'), 'icon' => 'fa-file-signature'],
+            ['label' => 'Booking', 'url' => route('booking'), 'icon' => 'fa-calendar-check'],
             ['label' => 'Contact', 'url' => route('contact'), 'icon' => 'fa-headset'],
         ];
     }
@@ -372,10 +331,10 @@ class AdminController extends Controller
                 'icon' => 'fa-globe',
             ],
             [
-                'label' => 'Quote Requests',
-                'description' => 'View service requests saved from the quote form.',
-                'url' => route('admin.quotes'),
-                'icon' => 'fa-clipboard-list',
+                'label' => 'Bookings',
+                'description' => 'Review customer bookings and manage approval status.',
+                'url' => route('admin.bookings'),
+                'icon' => 'fa-calendar-check',
             ],
             [
                 'label' => 'Contact Messages',
@@ -402,36 +361,4 @@ class AdminController extends Controller
         return $validated;
     }
 
-    /**
-     * @return array{name: string, email: string, service: string, message: string, is_approved: bool}
-     */
-    private function validatedQuoteData(Request $request): array
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'min:2', 'max:100'],
-            'email' => ['required', 'string', 'email', 'max:150'],
-            'service' => ['required', 'string', 'max:100'],
-            'message' => ['required', 'string', 'min:1', 'max:2000'],
-        ]);
-
-        $validated['is_approved'] = $request->boolean('is_approved');
-
-        return $validated;
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function quoteServiceOptions(?string $currentService = null): array
-    {
-        $services = Service::active()->oldest()->pluck('title')->all();
-
-        if ($currentService !== null && $currentService !== '' && ! in_array($currentService, $services, true)) {
-            $services[] = $currentService;
-        }
-
-        return $services !== []
-            ? $services
-            : ['IT Consultation', 'Web Development', 'App Development', 'Cyber Security'];
-    }
 }

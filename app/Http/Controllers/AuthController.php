@@ -13,7 +13,7 @@ class AuthController extends Controller
 {
     public function showLogin(Request $request): View
     {
-        $intendedUrl = $this->storeIntendedQuoteUrl($request);
+        $intendedUrl = $this->storeIntendedBookingUrl($request);
 
         return view('auth.login', [
             'pageTitle' => 'Login',
@@ -45,7 +45,7 @@ class AuthController extends Controller
 
     public function showRegister(Request $request): View
     {
-        $intendedUrl = $this->storeIntendedQuoteUrl($request);
+        $intendedUrl = $this->storeIntendedBookingUrl($request);
 
         return view('auth.register', [
             'pageTitle' => 'Create Account',
@@ -94,9 +94,9 @@ class AuthController extends Controller
         return route($user->isAdmin() ? 'admin.dashboard' : 'user.dashboard');
     }
 
-    private function storeIntendedQuoteUrl(Request $request): ?string
+    private function storeIntendedBookingUrl(Request $request): ?string
     {
-        $redirect = $this->validQuoteRedirect($request);
+        $redirect = $this->validBookingRedirect($request);
 
         if ($redirect !== null) {
             $request->session()->put('url.intended', $redirect);
@@ -109,7 +109,7 @@ class AuthController extends Controller
         return is_string($intended) ? $intended : null;
     }
 
-    private function validQuoteRedirect(Request $request): ?string
+    private function validBookingRedirect(Request $request): ?string
     {
         $redirect = $request->query('redirect');
 
@@ -130,9 +130,9 @@ class AuthController extends Controller
         }
 
         $redirectPath = parse_url($redirect, PHP_URL_PATH);
-        $quotePath = parse_url(route('quote'), PHP_URL_PATH);
+        $bookingPath = parse_url(route('booking'), PHP_URL_PATH);
 
-        return $redirectPath === $quotePath ? $redirect : null;
+        return $redirectPath === $bookingPath ? $redirect : null;
     }
 
     private function displayPath(?string $url): ?string

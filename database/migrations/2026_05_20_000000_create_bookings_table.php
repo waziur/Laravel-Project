@@ -11,13 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quote_requests', function (Blueprint $table) {
+        Schema::create('bookings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name', 100);
             $table->string('email', 150);
+            $table->string('phone', 30)->nullable();
             $table->string('service', 100);
+            $table->date('preferred_date')->nullable();
+            $table->string('preferred_time', 50)->nullable();
             $table->text('message');
+            $table->string('status', 20)->default('pending')->index();
             $table->timestamps();
+
+            $table->index(['user_id', 'status']);
         });
     }
 
@@ -26,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('quote_requests');
+        Schema::dropIfExists('bookings');
     }
 };

@@ -26,7 +26,7 @@
                         <h4 class="text-primary mb-0">+012 345 6789</h4>
                     </div>
                 </div>
-                <a href="{{ route('quote') }}" class="btn btn-primary py-3 px-5 mt-3 wow zoomIn" data-wow-delay="0.9s">Request A Quote</a>
+                <a href="{{ route('booking') }}" class="btn btn-primary py-3 px-5 mt-3 wow zoomIn" data-wow-delay="0.9s">Book A Service</a>
             </div>
             <div class="col-lg-5" style="min-height: 500px;">
                 <div class="position-relative h-100">

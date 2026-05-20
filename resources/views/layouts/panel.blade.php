@@ -57,13 +57,18 @@
                             <i class="fa fa-cubes"></i>
                             <span>Services</span>
                         </a>
-                        <a href="{{ route('admin.quotes') }}" class="panel-link {{ request()->routeIs('admin.quotes*') ? 'active' : '' }}">
-                            <i class="fa fa-file-signature"></i>
-                            <span>Quotes</span>
+                        <a href="{{ route('admin.bookings') }}" class="panel-link {{ request()->routeIs('admin.bookings*') ? 'active' : '' }}">
+                            <i class="fa fa-calendar-check"></i>
+                            <span>Bookings</span>
                         </a>
                         <a href="{{ route('admin.contacts') }}" class="panel-link {{ request()->routeIs('admin.contacts') ? 'active' : '' }}">
                             <i class="fa fa-envelope-open-text"></i>
                             <span>Messages</span>
+                        </a>
+                    @else
+                        <a href="{{ route('user.bookings') }}" class="panel-link {{ request()->routeIs('user.bookings') ? 'active' : '' }}">
+                            <i class="fa fa-calendar-check"></i>
+                            <span>Bookings</span>
                         </a>
                     @endif
                 </nav>
@@ -72,9 +77,9 @@
             <div class="panel-nav-block">
                 <span class="panel-nav-label">Website</span>
                 <nav class="panel-nav">
-                    <a href="{{ route('quote') }}" class="panel-link">
-                        <i class="fa fa-file-signature"></i>
-                        <span>Quote</span>
+                    <a href="{{ route('booking') }}" class="panel-link">
+                        <i class="fa fa-calendar-plus"></i>
+                        <span>Booking</span>
                     </a>
                     <a href="{{ route('service') }}" class="panel-link">
                         <i class="fa fa-cubes"></i>
@@ -112,8 +117,8 @@
                     <span class="panel-subtitle">Welcome back, {{ $currentUser->name }}</span>
                 </div>
                 <div class="panel-topbar-actions">
-                    <a href="{{ route('quote') }}" class="panel-icon-action" title="Quote">
-                        <i class="fa fa-file-signature"></i>
+                    <a href="{{ route('booking') }}" class="panel-icon-action" title="Booking">
+                        <i class="fa fa-calendar-plus"></i>
                     </a>
                     <a href="{{ route('home') }}" class="btn btn-outline-primary">
                         <i class="fa fa-globe me-2"></i>View Site

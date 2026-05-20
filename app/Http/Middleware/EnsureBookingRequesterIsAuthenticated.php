@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureQuoteRequesterIsAuthenticated
+class EnsureBookingRequesterIsAuthenticated
 {
     public function handle(Request $request, Closure $next): Response
     {
@@ -23,6 +23,6 @@ class EnsureQuoteRequesterIsAuthenticated
 
         return redirect()
             ->route('login', ['redirect' => $request->fullUrl()])
-            ->with('auth_notice', 'Please log in or create an account to request a quote.');
+            ->with('auth_notice', 'Please log in or create an account to submit a booking.');
     }
 }

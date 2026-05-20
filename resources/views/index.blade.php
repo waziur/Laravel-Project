@@ -4,24 +4,24 @@
     <div id="header-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img class="w-100" src="{{ asset('img/carousel-1.jpg') }}" alt="Technology team planning a digital project">
+                <img class="w-100" src="{{ asset('img/carousel-1.jpg') }}" alt="Digital solution team">
                 <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
                     <div class="p-3" style="max-width: 900px;">
                         <h5 class="text-white text-uppercase mb-3 animated slideInDown">Creative & Innovative</h5>
                         <h1 class="display-1 text-white mb-md-4 animated zoomIn">Creative & Innovative Digital Solution</h1>
-                        <a href="{{ route('quote') }}" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Free Quote</a>
+                        <a href="{{ route('booking') }}" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Book A Service</a>
                         <a href="{{ route('contact') }}" class="btn btn-outline-light py-md-3 px-md-5 animated slideInRight">Contact Us</a>
                     </div>
                 </div>
             </div>
             <div class="carousel-item">
-                <img class="w-100" src="{{ asset('img/carousel-2.jpg') }}" alt="Developers collaborating around a laptop">
+                <img class="w-100" src="{{ asset('img/carousel-2.jpg') }}" alt="Technology workspace">
                 <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
                     <div class="p-3" style="max-width: 900px;">
-                        <h5 class="text-white text-uppercase mb-3 animated slideInDown">Secure & Reliable</h5>
-                        <h1 class="display-1 text-white mb-md-4 animated zoomIn">Modern IT Services for Growing Teams</h1>
+                        <h5 class="text-white text-uppercase mb-3 animated slideInDown">Plan, Build, Secure</h5>
+                        <h1 class="display-1 text-white mb-md-4 animated zoomIn">Reliable IT Services For Growing Teams</h1>
                         <a href="{{ route('service') }}" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Our Services</a>
-                        <a href="{{ route('contact') }}" class="btn btn-outline-light py-md-3 px-md-5 animated slideInRight">Contact Us</a>
+                        <a href="{{ route('booking') }}" class="btn btn-outline-light py-md-3 px-md-5 animated slideInRight">Book Now</a>
                     </div>
                 </div>
             </div>
@@ -42,8 +42,7 @@
     @include('partials.about-section')
     @include('partials.features-section')
     @include('partials.services-grid')
-    @include('partials.quote-cta')
-    @include('partials.approved-quotes-section')
+    @include('partials.booking-cta')
     @include('partials.testimonial-section')
     @include('partials.team-section')
     @include('partials.vendor-carousel')

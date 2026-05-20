@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Booking;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,36 @@ class DashboardController extends Controller
             'user' => $request->user(),
             'pageTitle' => 'User Dashboard',
             'quickLinks' => $this->quickLinks(),
+            'bookingCount' => $request->user()->bookings()->count(),
+        ]);
+    }
+
+    public function bookings(Request $request): View
+    {
+        $search = $request->string('search')->trim()->toString();
+        $status = $request->string('status')->trim()->toString();
+        $status = in_array($status, array_keys(Booking::statuses()), true) ? $status : '';
+
+        $bookings = $request->user()
+            ->bookings()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('service', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('message', 'like', "%{$search}%");
+                });
+            })
+            ->when($status !== '', fn ($query) => $query->status($status))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('dashboard.bookings', [
+            'pageTitle' => 'My Bookings',
+            'bookings' => $bookings,
+            'search' => $search,
+            'status' => $status,
+            'statuses' => Booking::statuses(),
         ]);
     }
 
@@ -31,10 +62,16 @@ class DashboardController extends Controller
     {
         return [
             [
-                'label' => 'Request a Quote',
-                'description' => 'Send a project requirement directly from your account.',
-                'icon' => 'fa-file-signature',
-                'url' => route('quote'),
+                'label' => 'Book a Service',
+                'description' => 'Send a booking request directly from your account.',
+                'icon' => 'fa-calendar-plus',
+                'url' => route('booking'),
+            ],
+            [
+                'label' => 'My Bookings',
+                'description' => 'Track every booking with details and admin status.',
+                'icon' => 'fa-calendar-check',
+                'url' => route('user.bookings'),
             ],
             [
                 'label' => 'Our Services',

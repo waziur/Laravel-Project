@@ -1,7 +1,7 @@
 @php
     $pageKey = $pageKey ?? 'home';
     $pageTitle = $pageTitle ?? 'Startup';
-    $pagesMenuActive = in_array($pageKey, ['feature', 'team', 'testimonial', 'quote'], true);
+    $pagesMenuActive = in_array($pageKey, ['feature', 'team', 'testimonial', 'booking'], true);
 @endphp
 
 <!DOCTYPE html>
@@ -75,7 +75,7 @@
                             <a href="{{ route('feature') }}" class="dropdown-item {{ $pageKey === 'feature' ? 'active' : '' }}">Our Features</a>
                             <a href="{{ route('team') }}" class="dropdown-item {{ $pageKey === 'team' ? 'active' : '' }}">Team Members</a>
                             <a href="{{ route('testimonial') }}" class="dropdown-item {{ $pageKey === 'testimonial' ? 'active' : '' }}">Testimonial</a>
-                            <a href="{{ route('quote') }}" class="dropdown-item {{ $pageKey === 'quote' ? 'active' : '' }}">Free Quote</a>
+                            <a href="{{ route('booking') }}" class="dropdown-item {{ $pageKey === 'booking' ? 'active' : '' }}">Book A Service</a>
                         </div>
                     </div>
                     <a href="{{ route('contact') }}" class="nav-item nav-link {{ $pageKey === 'contact' ? 'active' : '' }}">Contact</a>
@@ -86,6 +86,9 @@
                                 <a href="{{ route('dashboard') }}" class="dropdown-item">Dashboard</a>
                                 @if (auth()->user()->isAdmin())
                                     <a href="{{ route('admin.users') }}" class="dropdown-item">Users</a>
+                                    <a href="{{ route('admin.bookings') }}" class="dropdown-item">Bookings</a>
+                                @else
+                                    <a href="{{ route('user.bookings') }}" class="dropdown-item">My Bookings</a>
                                 @endif
                                 <form action="{{ route('logout') }}" method="post" data-toast-pending="Logging you out...">
                                     @csrf
@@ -98,7 +101,7 @@
                     @endauth
                 </div>
                 <button type="button" class="btn text-primary ms-3" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fa fa-search"></i></button>
-                <a href="{{ route('quote') }}" class="btn btn-primary py-2 px-4 ms-3">Get A Quote</a>
+                <a href="{{ route('booking') }}" class="btn btn-primary py-2 px-4 ms-3">Book Now</a>
             </div>
         </nav>
 
@@ -187,7 +190,7 @@
                                 <a class="text-light mb-2" href="{{ route('about') }}"><i class="bi bi-arrow-right text-primary me-2"></i>About Us</a>
                                 <a class="text-light mb-2" href="{{ route('service') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Our Services</a>
                                 <a class="text-light mb-2" href="{{ route('team') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Meet The Team</a>
-                                <a class="text-light mb-2" href="{{ route('quote') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Free Quote</a>
+                                <a class="text-light mb-2" href="{{ route('booking') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Book A Service</a>
                                 <a class="text-light" href="{{ route('contact') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Contact Us</a>
                             </div>
                         </div>
@@ -201,7 +204,7 @@
                                 <a class="text-light mb-2" href="{{ route('service') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Web Development</a>
                                 <a class="text-light mb-2" href="{{ route('service') }}"><i class="bi bi-arrow-right text-primary me-2"></i>App Development</a>
                                 <a class="text-light mb-2" href="{{ route('testimonial') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Testimonials</a>
-                                <a class="text-light" href="{{ route('quote') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Request Quote</a>
+                                <a class="text-light" href="{{ route('booking') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Booking</a>
                             </div>
                         </div>
                     </div>

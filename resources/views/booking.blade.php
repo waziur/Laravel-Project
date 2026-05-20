@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
 @section('content')
-    @include('partials.quote-cta')
+    @include('partials.booking-cta')
     @include('partials.vendor-carousel')
 @endsection

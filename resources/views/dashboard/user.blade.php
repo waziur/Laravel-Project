@@ -24,9 +24,9 @@
             <h3>{{ $user->roleName() }}</h3>
         </article>
         <article class="panel-card">
-            <span class="panel-card-icon bg-info"><i class="fa fa-calendar-alt"></i></span>
-            <p class="panel-card-label">Joined</p>
-            <h3>{{ $user->created_at?->format('M d, Y') ?? 'Today' }}</h3>
+            <span class="panel-card-icon bg-info"><i class="fa fa-calendar-check"></i></span>
+            <p class="panel-card-label">Bookings</p>
+            <h3>{{ $bookingCount }}</h3>
         </article>
     </section>
 

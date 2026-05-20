@@ -27,17 +27,17 @@ test('new accounts are logged into the user dashboard', function () {
         ->assertSee('Logged in as user');
 });
 
-test('new accounts return to the intended quote page after registration', function () {
+test('new accounts return to the intended booking page after registration', function () {
     $response = $this
-        ->withSession(['url.intended' => route('quote')])
+        ->withSession(['url.intended' => route('booking')])
         ->post('/register', [
-            'name' => 'Quote Client',
-            'email' => 'quote-client@example.com',
+            'name' => 'Booking Client',
+            'email' => 'booking-client@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
 
-    $response->assertRedirect(route('quote'));
+    $response->assertRedirect(route('booking'));
 
     $this->assertAuthenticated();
 });

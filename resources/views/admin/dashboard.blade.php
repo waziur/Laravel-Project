@@ -14,7 +14,7 @@
             </div>
             <div>
                 <strong>{{ $stats[3]['value'] }}</strong>
-                <span>Quotes</span>
+                <span>Bookings</span>
             </div>
             <div>
                 <strong>{{ $stats[4]['value'] }}</strong>

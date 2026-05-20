@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Booking;
 use App\Models\ContactMessage;
-use App\Models\QuoteRequest;
 use App\Models\Service;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -14,9 +14,7 @@ class FrontendController extends Controller
 {
     public function home(): View
     {
-        return view('index', $this->pageData('Home', 'home') + [
-            'approvedQuotes' => QuoteRequest::approved()->latest()->take(6)->get(),
-        ]);
+        return view('index', $this->pageData('Home', 'home'));
     }
 
     public function about(): View
@@ -44,9 +42,9 @@ class FrontendController extends Controller
         return view('testimonial', $this->pageData('Testimonial', 'testimonial'));
     }
 
-    public function quote(): View
+    public function booking(): View
     {
-        return view('quote', $this->pageData('Free Quote', 'quote'));
+        return view('booking', $this->pageData('Book A Service', 'booking'));
     }
 
     public function contact(): View
@@ -54,27 +52,33 @@ class FrontendController extends Controller
         return view('contact', $this->pageData('Contact Us', 'contact'));
     }
 
-    public function storeQuote(Request $request): RedirectResponse
+    public function storeBooking(Request $request): RedirectResponse
     {
         $request->merge([
-            'name' => $this->trimStringInput($request, 'name'),
-            'email' => $this->trimStringInput($request, 'email'),
+            'phone' => $this->trimStringInput($request, 'phone'),
             'service' => $this->trimStringInput($request, 'service'),
+            'preferred_time' => $this->trimStringInput($request, 'preferred_time'),
             'message' => $this->trimStringInput($request, 'message'),
         ]);
 
         $validated = $request->validate([
-            'name' => ['bail', 'required', 'string', 'min:2', 'max:100'],
-            'email' => ['bail', 'required', 'string', 'email', 'max:150'],
-            'service' => ['bail', 'required', 'string', Rule::in($this->quoteServiceOptions())],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'service' => ['bail', 'required', 'string', Rule::in($this->bookingServiceOptions())],
+            'preferred_date' => ['bail', 'required', 'date', 'after_or_equal:today'],
+            'preferred_time' => ['nullable', 'string', 'max:50'],
             'message' => ['bail', 'required', 'string', 'min:10', 'max:2000'],
         ]);
 
-        QuoteRequest::create($validated + [
-            'is_approved' => false,
+        $user = $request->user();
+
+        Booking::create($validated + [
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'status' => Booking::STATUS_PENDING,
         ]);
 
-        return back()->with('success', 'Your quote request has been saved and is waiting for admin approval.');
+        return back()->with('success', 'Your booking has been submitted and is waiting for admin review.');
     }
 
     public function sendContact(Request $request): RedirectResponse
@@ -100,7 +104,7 @@ class FrontendController extends Controller
         ];
     }
 
-    private function quoteServiceOptions(): array
+    private function bookingServiceOptions(): array
     {
         $services = Service::active()->oldest()->pluck('title')->all();
 
