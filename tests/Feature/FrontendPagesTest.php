@@ -42,12 +42,19 @@ test('guest users cannot submit bookings', function () {
 });
 
 test('authenticated users can view the booking form', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'name' => 'Account Holder',
+        'email' => 'account@example.com',
+    ]);
 
     $this->actingAs($user)
         ->get('/booking')
         ->assertOk()
         ->assertSee('Book A Service')
+        ->assertSee('name="name"', false)
+        ->assertSee('name="email"', false)
+        ->assertDontSee('value="Account Holder"', false)
+        ->assertDontSee('value="account@example.com"', false)
         ->assertSee('name="service"', false);
 });
 
@@ -66,6 +73,8 @@ test('booking form accepts valid requests from authenticated users', function ()
     ]);
 
     $this->actingAs($user)->post('/booking', [
+        'name' => 'Project Booker',
+        'email' => 'booker@example.com',
         'phone' => '+8801712345678',
         'service' => 'Web Development',
         'preferred_date' => now()->addDay()->toDateString(),
@@ -78,7 +87,8 @@ test('booking form accepts valid requests from authenticated users', function ()
 
     $this->assertDatabaseHas('bookings', [
         'user_id' => $user->id,
-        'email' => 'demo@example.com',
+        'name' => 'Project Booker',
+        'email' => 'booker@example.com',
         'service' => 'Web Development',
         'status' => Booking::STATUS_PENDING,
     ]);
@@ -95,7 +105,7 @@ test('booking form rejects incomplete or invalid requests', function () {
             'message' => 'Too short',
         ])
         ->assertRedirect('/booking')
-        ->assertSessionHasErrors(['service', 'preferred_date', 'message']);
+        ->assertSessionHasErrors(['name', 'email', 'service', 'preferred_date', 'message']);
 
     $this->assertDatabaseCount('bookings', 0);
 });

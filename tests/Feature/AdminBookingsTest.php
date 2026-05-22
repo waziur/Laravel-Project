@@ -15,6 +15,8 @@ test('submitted bookings stay pending until an admin changes status', function (
 
     $this->actingAs($user)
         ->post(route('booking.store'), [
+            'name' => 'Service Requester',
+            'email' => 'requester@example.com',
             'phone' => '+8801712345678',
             'service' => 'Web Development',
             'preferred_date' => now()->addDay()->toDateString(),
@@ -24,14 +26,19 @@ test('submitted bookings stay pending until an admin changes status', function (
         ->assertSessionHasNoErrors()
         ->assertSessionHas('success');
 
-    $booking = Booking::where('email', 'client@example.com')->firstOrFail();
+    $booking = Booking::where('email', 'requester@example.com')->firstOrFail();
 
     expect($booking->status)->toBe(Booking::STATUS_PENDING);
+    expect($booking->user_id)->toBe($user->id);
 
     $this->actingAs($admin)
         ->get(route('admin.bookings'))
         ->assertOk()
+        ->assertSee('Service Requester')
+        ->assertSee('requester@example.com')
+        ->assertSee('+8801712345678')
         ->assertSee('Booking Client')
+        ->assertSee('client@example.com')
         ->assertSee('Web Development')
         ->assertSee('Pending');
 
@@ -98,6 +105,7 @@ test('users can only see their own bookings', function () {
         ->get(route('user.bookings'))
         ->assertOk()
         ->assertSee('Cyber Security')
+        ->assertSee('Owner User')
         ->assertSee('Owner booking information should be visible.')
         ->assertSee('Accepted')
         ->assertDontSee('Data Analytics')

@@ -5,17 +5,21 @@
 @endphp
 
 @auth
-    @php($bookingUser = auth()->user())
-
     <form action="{{ route('booking.store') }}" method="post" class="w-100" data-toast-pending="Submitting your booking request...">
         @csrf
 
         <div class="row g-3">
             <div class="col-xl-12">
-                <input type="text" value="{{ $bookingUser->name }}" class="form-control bg-light border-0" placeholder="Your Name" style="height: 55px;" readonly>
+                <input type="text" name="name" value="{{ old('name') }}" class="form-control bg-light border-0 @error('name') is-invalid @enderror" placeholder="Your Name" style="height: 55px;" maxlength="100" autocomplete="name" required>
+                @error('name')
+                    <div class="invalid-feedback bg-white px-2">{{ $message }}</div>
+                @enderror
             </div>
             <div class="col-12">
-                <input type="email" value="{{ $bookingUser->email }}" class="form-control bg-light border-0" placeholder="Your Email" style="height: 55px;" readonly>
+                <input type="email" name="email" value="{{ old('email') }}" class="form-control bg-light border-0 @error('email') is-invalid @enderror" placeholder="Your Email" style="height: 55px;" maxlength="150" autocomplete="email" required>
+                @error('email')
+                    <div class="invalid-feedback bg-white px-2">{{ $message }}</div>
+                @enderror
             </div>
             <div class="col-12">
                 <input type="text" name="phone" value="{{ old('phone') }}" class="form-control bg-light border-0 @error('phone') is-invalid @enderror" placeholder="Phone Number" style="height: 55px;" maxlength="30" autocomplete="tel">

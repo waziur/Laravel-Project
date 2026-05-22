@@ -29,8 +29,8 @@
             <table class="table panel-table booking-admin-table align-middle mb-0">
                 <thead>
                     <tr>
-                        <th>Booked By</th>
-                        <th>Contact</th>
+                        <th>Booking Person</th>
+                        <th>Account Info</th>
                         <th>Service</th>
                         <th>Schedule</th>
                         <th>Details</th>
@@ -43,12 +43,19 @@
                     @forelse ($bookings as $booking)
                         <tr>
                             <td>
-                                <strong>{{ $booking->name }}</strong>
-                                <small class="d-block text-muted">Account #{{ $booking->user_id }}{{ $booking->user ? ' - '.$booking->user->roleName() : '' }}</small>
+                                <ul class="booking-info-list">
+                                    <li><span>Name:</span> {{ $booking->name }}</li>
+                                    <li><span>Email:</span> {{ $booking->email }}</li>
+                                    <li><span>Phone:</span> {{ $booking->phone ?: 'No phone added' }}</li>
+                                </ul>
                             </td>
                             <td>
-                                <span class="d-block">{{ $booking->email }}</span>
-                                <small class="text-muted">{{ $booking->phone ?: 'No phone added' }}</small>
+                                <ul class="booking-info-list">
+                                    <li><span>Name:</span> {{ $booking->user?->name ?? 'Account removed' }}</li>
+                                    <li><span>Email:</span> {{ $booking->user?->email ?? 'N/A' }}</li>
+                                    <li><span>Role:</span> {{ $booking->user?->roleName() ?? 'N/A' }}</li>
+                                    <li><span>Account:</span> #{{ $booking->user_id }}</li>
+                                </ul>
                             </td>
                             <td>{{ $booking->service }}</td>
                             <td>{{ $booking->scheduleLabel() }}</td>

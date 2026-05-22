@@ -14,7 +14,7 @@
 
         <form action="{{ route('user.bookings') }}" method="get" class="panel-search">
             <div class="input-group">
-                <input type="search" name="search" value="{{ $search }}" class="form-control" placeholder="Search service, phone, or details">
+                <input type="search" name="search" value="{{ $search }}" class="form-control" placeholder="Search name, email, phone, service, or details">
                 <select name="status" class="form-select">
                     <option value="">All statuses</option>
                     @foreach ($statuses as $value => $label)
@@ -44,6 +44,7 @@
                             <td>{{ $booking->service }}</td>
                             <td>{{ $booking->scheduleLabel() }}</td>
                             <td>
+                                <strong class="d-block">{{ $booking->name }}</strong>
                                 <span class="d-block">{{ $booking->email }}</span>
                                 <small class="text-muted">{{ $booking->phone ?: 'No phone added' }}</small>
                             </td>

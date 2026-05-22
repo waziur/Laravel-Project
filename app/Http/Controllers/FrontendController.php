@@ -55,6 +55,8 @@ class FrontendController extends Controller
     public function storeBooking(Request $request): RedirectResponse
     {
         $request->merge([
+            'name' => $this->trimStringInput($request, 'name'),
+            'email' => $this->trimStringInput($request, 'email'),
             'phone' => $this->trimStringInput($request, 'phone'),
             'service' => $this->trimStringInput($request, 'service'),
             'preferred_time' => $this->trimStringInput($request, 'preferred_time'),
@@ -62,6 +64,8 @@ class FrontendController extends Controller
         ]);
 
         $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:150'],
             'phone' => ['nullable', 'string', 'max:30'],
             'service' => ['bail', 'required', 'string', Rule::in($this->bookingServiceOptions())],
             'preferred_date' => ['bail', 'required', 'date', 'after_or_equal:today'],
@@ -69,12 +73,8 @@ class FrontendController extends Controller
             'message' => ['bail', 'required', 'string', 'min:10', 'max:2000'],
         ]);
 
-        $user = $request->user();
-
         Booking::create($validated + [
-            'user_id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
+            'user_id' => $request->user()->id,
             'status' => Booking::STATUS_PENDING,
         ]);
 

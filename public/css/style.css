@@ -2088,6 +2088,21 @@ h6,
     min-width: 1280px;
 }
 
+.booking-info-list {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding-left: 18px;
+    color: var(--panel-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.booking-info-list span {
+    color: var(--panel-text);
+    font-weight: 800;
+}
+
 .service-admin-thumb {
     width: 74px;
     height: 58px;
