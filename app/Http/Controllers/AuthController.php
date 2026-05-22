@@ -15,7 +15,7 @@ class AuthController extends Controller
     {
         $intendedUrl = $this->storeIntendedBookingUrl($request);
 
-        return view('auth.login', [
+        return view('pages.auth.login', [
             'pageTitle' => 'Login',
             'pageKey' => 'login',
             'intendedUrl' => $intendedUrl,
@@ -47,7 +47,7 @@ class AuthController extends Controller
     {
         $intendedUrl = $this->storeIntendedBookingUrl($request);
 
-        return view('auth.register', [
+        return view('pages.auth.register', [
             'pageTitle' => 'Create Account',
             'pageKey' => 'register',
             'intendedUrl' => $intendedUrl,

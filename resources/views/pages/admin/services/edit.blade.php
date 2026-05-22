@@ -1,4 +1,4 @@
-@extends('layouts.panel')
+@extends('master.panel')
 
 @section('panel')
     <section class="panel-section">
@@ -12,7 +12,7 @@
             </a>
         </div>
 
-        @include('admin.services._form', [
+        @include('pages.admin.services._form', [
             'action' => route('admin.services.update', $service),
             'method' => 'PUT',
             'buttonLabel' => 'Update Service',

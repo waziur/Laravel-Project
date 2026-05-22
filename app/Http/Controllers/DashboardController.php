@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
     public function user(Request $request): View
     {
-        return view('dashboard.user', [
+        return view('pages.dashboard.user', [
             'user' => $request->user(),
             'pageTitle' => 'User Dashboard',
             'quickLinks' => $this->quickLinks(),
@@ -48,7 +48,7 @@ class DashboardController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('dashboard.bookings', [
+        return view('pages.dashboard.bookings', [
             'pageTitle' => 'My Bookings',
             'bookings' => $bookings,
             'search' => $search,

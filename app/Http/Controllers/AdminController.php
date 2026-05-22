@@ -9,112 +9,25 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
     public function dashboard(): View
     {
-        $totalUsers = User::count();
-        $adminUsers = User::where('is_admin', true)->count();
-        $regularUsers = User::where('is_admin', false)->count();
-        $bookingRequests = Booking::count();
-        $contactMessages = ContactMessage::count();
-        $activeServices = Service::active()->count();
+        $counts = $this->dashboardCounts();
         $latestUsers = User::latest()->take(6)->get();
         $latestBookings = Booking::with('user')->latest()->take(4)->get();
         $latestMessages = ContactMessage::latest()->take(4)->get();
 
-        $dashboardBars = [
-            ['label' => 'Users', 'value' => $totalUsers, 'tone' => 'tone-cyan'],
-            ['label' => 'Admins', 'value' => $adminUsers, 'tone' => 'tone-green'],
-            ['label' => 'Bookings', 'value' => $bookingRequests, 'tone' => 'tone-amber'],
-            ['label' => 'Messages', 'value' => $contactMessages, 'tone' => 'tone-rose'],
-        ];
-
-        $highestBarValue = max(array_column($dashboardBars, 'value')) ?: 1;
-
-        $dashboardBars = array_map(function (array $bar) use ($highestBarValue) {
-            $bar['height'] = max(18, (int) round(($bar['value'] / $highestBarValue) * 100));
-
-            return $bar;
-        }, $dashboardBars);
-
-        $recentActivity = collect()
-            ->concat($latestUsers->map(fn (User $user) => [
-                'title' => $user->name,
-                'meta' => 'New ' . strtolower($user->roleName()) . ' account',
-                'icon' => 'fa-user-plus',
-                'tone' => 'tone-cyan',
-                'created_at' => $user->created_at,
-            ]))
-            ->concat($latestBookings->map(fn (Booking $booking) => [
-                'title' => $booking->name,
-                'meta' => 'Booking for ' . $booking->service . ' is ' . strtolower($booking->statusLabel()),
-                'icon' => 'fa-calendar-check',
-                'tone' => 'tone-amber',
-                'created_at' => $booking->created_at,
-            ]))
-            ->concat($latestMessages->map(fn (ContactMessage $message) => [
-                'title' => $message->name,
-                'meta' => $message->subject,
-                'icon' => 'fa-envelope-open-text',
-                'tone' => 'tone-green',
-                'created_at' => $message->created_at,
-            ]))
-            ->sortByDesc(fn (array $activity) => $activity['created_at']?->timestamp ?? 0)
-            ->take(6)
-            ->values();
-
-        return view('admin.dashboard', [
+        return view('pages.admin.dashboard', [
             'pageTitle' => 'Admin Dashboard',
-            'stats' => [
-                [
-                    'label' => 'Total Users',
-                    'value' => $totalUsers,
-                    'icon' => 'fa-users',
-                    'tone' => 'primary',
-                    'note' => 'Registered accounts',
-                ],
-                [
-                    'label' => 'Admins',
-                    'value' => $adminUsers,
-                    'icon' => 'fa-user-shield',
-                    'tone' => 'success',
-                    'note' => 'Privileged users',
-                ],
-                [
-                    'label' => 'Customers',
-                    'value' => $regularUsers,
-                    'icon' => 'fa-user-check',
-                    'tone' => 'info',
-                    'note' => 'Regular users',
-                ],
-                [
-                    'label' => 'Bookings',
-                    'value' => $bookingRequests,
-                    'icon' => 'fa-calendar-check',
-                    'tone' => 'warning',
-                    'note' => 'Customer booking requests',
-                ],
-                [
-                    'label' => 'Messages',
-                    'value' => $contactMessages,
-                    'icon' => 'fa-envelope-open-text',
-                    'tone' => 'secondary',
-                    'note' => 'Contact inbox',
-                ],
-                [
-                    'label' => 'Active Services',
-                    'value' => $activeServices,
-                    'icon' => 'fa-cubes',
-                    'tone' => 'primary',
-                    'note' => 'Visible on site',
-                ],
-            ],
+            'stats' => $this->dashboardStats($counts),
             'latestUsers' => $latestUsers,
-            'dashboardBars' => $dashboardBars,
-            'recentActivity' => $recentActivity,
+            'dashboardBars' => $this->dashboardBars($counts),
+            'recentActivity' => $this->recentActivity($latestUsers, $latestBookings, $latestMessages),
             'siteLinks' => $this->siteLinks(),
             'adminTools' => $this->adminTools(),
         ]);
@@ -135,7 +48,7 @@ class AdminController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.services.index', [
+        return view('pages.admin.services.index', [
             'pageTitle' => 'Manage Services',
             'services' => $services,
             'search' => $search,
@@ -144,7 +57,7 @@ class AdminController extends Controller
 
     public function createService(): View
     {
-        return view('admin.services.create', [
+        return view('pages.admin.services.create', [
             'pageTitle' => 'Add Service',
             'service' => new Service(['is_active' => true]),
         ]);
@@ -161,7 +74,7 @@ class AdminController extends Controller
 
     public function editService(Service $service): View
     {
-        return view('admin.services.edit', [
+        return view('pages.admin.services.edit', [
             'pageTitle' => 'Edit Service',
             'service' => $service,
         ]);
@@ -210,7 +123,7 @@ class AdminController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.bookings', [
+        return view('pages.admin.bookings', [
             'pageTitle' => 'Bookings',
             'bookings' => $bookings,
             'search' => $search,
@@ -231,7 +144,7 @@ class AdminController extends Controller
 
         return redirect()
             ->route('admin.bookings')
-            ->with('status', 'Booking status updated to ' . strtolower($booking->statusLabel()) . '.');
+            ->with('status', 'Booking status updated to '.strtolower($booking->statusLabel()).'.');
     }
 
     public function contacts(Request $request): View
@@ -250,7 +163,7 @@ class AdminController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.contacts', [
+        return view('pages.admin.contacts', [
             'pageTitle' => 'Contact Messages',
             'messages' => $messages,
             'search' => $search,
@@ -282,11 +195,146 @@ class AdminController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.users', [
+        return view('pages.admin.users', [
             'pageTitle' => 'Manage Users',
             'users' => $users,
             'search' => $search,
         ]);
+    }
+
+    /**
+     * @return array{totalUsers: int, adminUsers: int, regularUsers: int, bookingRequests: int, contactMessages: int, activeServices: int}
+     */
+    private function dashboardCounts(): array
+    {
+        return [
+            'totalUsers' => User::count(),
+            'adminUsers' => User::where('is_admin', true)->count(),
+            'regularUsers' => User::where('is_admin', false)->count(),
+            'bookingRequests' => Booking::count(),
+            'contactMessages' => ContactMessage::count(),
+            'activeServices' => Service::active()->count(),
+        ];
+    }
+
+    /**
+     * @param  array{totalUsers: int, adminUsers: int, regularUsers: int, bookingRequests: int, contactMessages: int, activeServices: int}  $counts
+     * @return array<int, array{label: string, value: int, icon: string, tone: string, note: string}>
+     */
+    private function dashboardStats(array $counts): array
+    {
+        return [
+            [
+                'label' => 'Total Users',
+                'value' => $counts['totalUsers'],
+                'icon' => 'fa-users',
+                'tone' => 'primary',
+                'note' => 'Registered accounts',
+            ],
+            [
+                'label' => 'Admins',
+                'value' => $counts['adminUsers'],
+                'icon' => 'fa-user-shield',
+                'tone' => 'success',
+                'note' => 'Privileged users',
+            ],
+            [
+                'label' => 'Customers',
+                'value' => $counts['regularUsers'],
+                'icon' => 'fa-user-check',
+                'tone' => 'info',
+                'note' => 'Regular users',
+            ],
+            [
+                'label' => 'Bookings',
+                'value' => $counts['bookingRequests'],
+                'icon' => 'fa-calendar-check',
+                'tone' => 'warning',
+                'note' => 'Customer booking requests',
+            ],
+            [
+                'label' => 'Messages',
+                'value' => $counts['contactMessages'],
+                'icon' => 'fa-envelope-open-text',
+                'tone' => 'secondary',
+                'note' => 'Contact inbox',
+            ],
+            [
+                'label' => 'Active Services',
+                'value' => $counts['activeServices'],
+                'icon' => 'fa-cubes',
+                'tone' => 'primary',
+                'note' => 'Visible on site',
+            ],
+        ];
+    }
+
+    /**
+     * @param  array{totalUsers: int, adminUsers: int, regularUsers: int, bookingRequests: int, contactMessages: int, activeServices: int}  $counts
+     * @return array<int, array{label: string, value: int, tone: string, height: int}>
+     */
+    private function dashboardBars(array $counts): array
+    {
+        $bars = [
+            ['label' => 'Users', 'value' => $counts['totalUsers'], 'tone' => 'tone-cyan'],
+            ['label' => 'Admins', 'value' => $counts['adminUsers'], 'tone' => 'tone-green'],
+            ['label' => 'Bookings', 'value' => $counts['bookingRequests'], 'tone' => 'tone-amber'],
+            ['label' => 'Messages', 'value' => $counts['contactMessages'], 'tone' => 'tone-rose'],
+        ];
+
+        $highestBarValue = max(array_column($bars, 'value')) ?: 1;
+
+        foreach ($bars as $index => $bar) {
+            $bars[$index]['height'] = max(18, (int) round(($bar['value'] / $highestBarValue) * 100));
+        }
+
+        return $bars;
+    }
+
+    /**
+     * @param  iterable<User>  $latestUsers
+     * @param  iterable<Booking>  $latestBookings
+     * @param  iterable<ContactMessage>  $latestMessages
+     * @return Collection<int, array{title: string, meta: string, icon: string, tone: string, created_at: Carbon|null}>
+     */
+    private function recentActivity(iterable $latestUsers, iterable $latestBookings, iterable $latestMessages): Collection
+    {
+        $activities = [];
+
+        foreach ($latestUsers as $user) {
+            $activities[] = [
+                'title' => $user->name,
+                'meta' => 'New '.strtolower($user->roleName()).' account',
+                'icon' => 'fa-user-plus',
+                'tone' => 'tone-cyan',
+                'created_at' => $user->created_at,
+            ];
+        }
+
+        foreach ($latestBookings as $booking) {
+            $activities[] = [
+                'title' => $booking->name,
+                'meta' => 'Booking for '.$booking->service.' is '.strtolower($booking->statusLabel()),
+                'icon' => 'fa-calendar-check',
+                'tone' => 'tone-amber',
+                'created_at' => $booking->created_at,
+            ];
+        }
+
+        foreach ($latestMessages as $message) {
+            $activities[] = [
+                'title' => $message->name,
+                'meta' => $message->subject,
+                'icon' => 'fa-envelope-open-text',
+                'tone' => 'tone-green',
+                'created_at' => $message->created_at,
+            ];
+        }
+
+        return collect($activities)
+            ->sortByDesc(fn (array $activity): int => $activity['created_at']?->timestamp ?? 0)
+            ->take(6)
+            ->values();
     }
 
     /**
@@ -360,5 +408,4 @@ class AdminController extends Controller
 
         return $validated;
     }
-
 }

@@ -1,4 +1,4 @@
-@extends('layouts.panel')
+@extends('master.panel')
 
 @section('panel')
     <section class="panel-section">

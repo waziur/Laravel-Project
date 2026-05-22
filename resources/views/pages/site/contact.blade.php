@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('master.master')
 
 @section('content')
     <div class="container-fluid py-5 wow fadeInUp" data-wow-delay="0.1s">
@@ -84,5 +84,5 @@
         </div>
     </div>
 
-    @include('partials.vendor-carousel')
+    @include('common.site.vendor-carousel')
 @endsection

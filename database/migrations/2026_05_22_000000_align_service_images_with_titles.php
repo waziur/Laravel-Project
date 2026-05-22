@@ -43,7 +43,7 @@ return new class extends Migration
     }
 
     /**
-     * @param array<string, string> $imagesByTitle
+     * @param  array<string, string>  $imagesByTitle
      */
     private function updateServiceImages(array $imagesByTitle): void
     {

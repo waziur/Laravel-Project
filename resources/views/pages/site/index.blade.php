@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('master.master')
 
 @section('hero')
     <div id="header-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
@@ -38,12 +38,12 @@
 @endsection
 
 @section('content')
-    @include('partials.facts-section')
-    @include('partials.about-section')
-    @include('partials.features-section')
-    @include('partials.services-grid')
-    @include('partials.booking-cta')
-    @include('partials.testimonial-section')
-    @include('partials.team-section')
-    @include('partials.vendor-carousel')
+    @include('common.site.facts-section')
+    @include('common.site.about-section')
+    @include('common.site.features-section')
+    @include('common.site.services-grid')
+    @include('common.site.booking-cta')
+    @include('common.site.testimonial-section')
+    @include('common.site.team-section')
+    @include('common.site.vendor-carousel')
 @endsection

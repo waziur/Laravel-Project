@@ -235,7 +235,7 @@
     <script src="{{ asset('lib/counterup/counterup.min.js') }}"></script>
     <script src="{{ asset('lib/owlcarousel/owl.carousel.min.js') }}"></script>
     <script src="{{ asset('js/main.js') }}"></script>
-    @include('partials.toasts')
+    @include('common.site.toasts')
     @stack('scripts')
 </body>
 

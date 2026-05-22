@@ -14,42 +14,42 @@ class FrontendController extends Controller
 {
     public function home(): View
     {
-        return view('index', $this->pageData('Home', 'home'));
+        return view('pages.site.index', $this->pageData('Home', 'home'));
     }
 
     public function about(): View
     {
-        return view('about', $this->pageData('About Us', 'about'));
+        return view('pages.site.about', $this->pageData('About Us', 'about'));
     }
 
     public function service(): View
     {
-        return view('service', $this->pageData('Services', 'service'));
+        return view('pages.site.service', $this->pageData('Services', 'service'));
     }
 
     public function feature(): View
     {
-        return view('feature', $this->pageData('Our Features', 'feature'));
+        return view('pages.site.feature', $this->pageData('Our Features', 'feature'));
     }
 
     public function team(): View
     {
-        return view('team', $this->pageData('Team Members', 'team'));
+        return view('pages.site.team', $this->pageData('Team Members', 'team'));
     }
 
     public function testimonial(): View
     {
-        return view('testimonial', $this->pageData('Testimonial', 'testimonial'));
+        return view('pages.site.testimonial', $this->pageData('Testimonial', 'testimonial'));
     }
 
     public function booking(): View
     {
-        return view('booking', $this->pageData('Book A Service', 'booking'));
+        return view('pages.site.booking', $this->pageData('Book A Service', 'booking'));
     }
 
     public function contact(): View
     {
-        return view('contact', $this->pageData('Contact Us', 'contact'));
+        return view('pages.site.contact', $this->pageData('Contact Us', 'contact'));
     }
 
     public function storeBooking(Request $request): RedirectResponse
