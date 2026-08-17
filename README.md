@@ -2,7 +2,7 @@
 
 Startup is a web-based IT service booking and management system developed with Laravel. It combines a public service website with user authentication, structured service booking, booking status tracking, contact messaging, and an administrative management panel.
 
-This is an **individual academic project** developed as part of CSE 4100 Field Work / Industrial Training.
+This is an individual academic project developed after completing Laravel industrial training at Appstick and documented for CSE 4100 Field Work.
 
 ## Project Overview
 
