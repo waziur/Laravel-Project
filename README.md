@@ -1,59 +1,258 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Startup — IT Service Booking and Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Startup is a web-based IT service booking and management system developed with Laravel. It combines a public service website with user authentication, structured service booking, booking status tracking, contact messaging, and an administrative management panel.
 
-## About Laravel
+This is an **individual academic project** developed as part of CSE 4100 Field Work / Industrial Training.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Project Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The system is designed for a single IT service company where visitors can explore available services and registered users can submit structured booking requests.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Administrators can manage services, review bookings, update booking statuses, view users, and manage customer contact messages from a centralized dashboard.
 
-## Learning Laravel
+The project demonstrates practical implementation of Laravel MVC architecture, authentication, middleware, relational database design, validation, role-based access control, responsive interfaces, and automated testing.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Main Features
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Public Website
 
-## Laravel Sponsors
+* Responsive Home, About, Services, Features, Team, Testimonial, Booking, and Contact pages
+* Active IT service catalogue
+* Individual service detail pages
+* Public contact/enquiry form
+* Responsive layout for desktop and mobile devices
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### User Authentication
 
-### Premium Partners
+* User registration
+* Login and logout
+* Session-based authentication
+* Password hashing
+* Protected authenticated routes
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Service Booking
 
-## Contributing
+* Authenticated service booking
+* Service selection
+* Preferred booking date and time
+* 15-minute booking time slots
+* Future-slot validation
+* Booking availability checking
+* Duplicate slot prevention
+* Structured customer requirements/message field
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### User Dashboard
 
-## Code of Conduct
+* Personal user dashboard
+* View booking history
+* Search and filter bookings
+* Track booking status
+* User-specific booking record isolation
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Booking Status Workflow
 
-## Security Vulnerabilities
+Bookings can move through the following states:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+* Pending
+* Accepted
+* Rejected
+* Completed
 
-## License
+Rejected and completed bookings release their reserved scheduling slot.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Administration Panel
+
+Administrators can:
+
+* View dashboard statistics
+* View and search registered users
+* View and filter service bookings
+* Update booking statuses
+* Create new services
+* Edit existing services
+* Activate or deactivate services
+* Delete services
+* View and search contact messages
+
+## Security and Validation
+
+The project includes:
+
+* Laravel authentication middleware
+* Administrator authorization middleware
+* CSRF protection
+* Server-side form validation
+* Password hashing
+* User-specific booking access
+* Booking status validation
+* Service availability validation
+* Unique booking-slot protection
+* Session-based access control
+
+## Tech Stack
+
+### Backend
+
+* PHP 8.2+
+* Laravel 12
+* Laravel MVC
+* Eloquent ORM
+* Laravel Middleware
+* Laravel Migrations
+
+### Frontend
+
+* Blade Templates
+* HTML5
+* Bootstrap 5
+* CSS
+* JavaScript
+
+### Database
+
+* MySQL
+* Relational database design
+* Foreign keys
+* Database indexes
+* Laravel migrations
+
+### Testing and Development
+
+* Pest
+* Git
+* Composer
+* Vite
+
+## Core Data Models
+
+The application uses four primary business models:
+
+* `User`
+* `Service`
+* `Booking`
+* `ContactMessage`
+
+A registered user can own multiple bookings, while services and customer contact messages are managed independently.
+
+## Application Workflow
+
+1. A visitor browses available IT services.
+2. The visitor creates an account or logs in.
+3. The authenticated user selects a service and available booking slot.
+4. The booking is submitted with a Pending status.
+5. An administrator reviews the request.
+6. The administrator updates the booking to Accepted, Rejected, or Completed.
+7. The user can view the latest booking status from the personal dashboard.
+
+## Installation
+
+### Requirements
+
+Make sure the following are installed:
+
+* PHP 8.2 or later
+* Composer
+* MySQL
+* Git
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/waziur/startup-service-booking-system.git
+cd startup-service-booking-system
+```
+
+### Install PHP Dependencies
+
+```bash
+composer install
+```
+
+### Create Environment File
+
+Copy `.env.example` and rename the copy to `.env`.
+
+Then generate the Laravel application key:
+
+```bash
+php artisan key:generate
+```
+
+### Configure Database
+
+Update the following values in `.env` according to your local MySQL configuration:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=startup
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Create a MySQL database named:
+
+```text
+startup
+```
+
+### Run Database Migrations
+
+```bash
+php artisan migrate --seed
+```
+
+### Start the Application
+
+```bash
+php artisan serve
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Testing
+
+The project contains Pest-based tests for important application behaviours.
+
+Run the test suite using:
+
+```bash
+php artisan test
+```
+
+## Project Context
+
+**Project:** Startup — A Web-Based IT Service Booking and Management System
+**Project Type:** Individual Academic Project
+**Course:** CSE 4100 — Field Work / Industrial Training
+**Department:** Computer Science and Engineering
+**University:** Northern University of Business and Technology Khulna
+
+## Developer
+
+**Khan Waziur Rahman**
+
+GitHub: [github.com/waziur](https://github.com/waziur)
+
+## Future Improvements
+
+Possible future extensions include:
+
+* Email verification and password recovery
+* Booking notifications
+* Secure user–administrator messaging
+* Online payment and invoicing
+* File attachments
+* Reporting and data export
+* Audit logging
+* Production deployment hardening
+* Multilingual support
+
+---
+
+This repository represents the final development version of the Startup service booking and management system.
