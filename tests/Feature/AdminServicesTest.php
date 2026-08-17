@@ -14,6 +14,9 @@ test('admin can create an active service that appears on the website', function 
             'title' => 'Cloud Automation',
             'image_url' => 'img/feature.jpg',
             'short_description' => 'Automated cloud workflows for faster delivery.',
+            'detail_overview' => 'Plan and automate cloud delivery pipelines with clear release controls.',
+            'included_services_text' => "Infrastructure as code setup\nCI/CD pipeline automation",
+            'delivery_steps_text' => "Review cloud workflow\nBuild automation plan",
             'is_active' => '1',
         ])
         ->assertRedirect(route('admin.services'))
@@ -27,6 +30,13 @@ test('admin can create an active service that appears on the website', function 
     $this->get(route('service'))
         ->assertOk()
         ->assertSee('Cloud Automation');
+
+    $service = Service::where('title', 'Cloud Automation')->firstOrFail();
+
+    $this->get(route('service.show', $service))
+        ->assertOk()
+        ->assertSee('Infrastructure as code setup')
+        ->assertSee('Build automation plan');
 });
 
 test('inactive services stay hidden from the website', function () {
@@ -37,6 +47,9 @@ test('inactive services stay hidden from the website', function () {
             'title' => 'Hidden UX Review',
             'image_url' => 'img/about.jpg',
             'short_description' => 'A service that should not be public yet.',
+            'detail_overview' => 'Private review service for internal testing.',
+            'included_services_text' => "UX audit\nPrototype notes",
+            'delivery_steps_text' => "Review screens\nShare feedback",
             'is_active' => '0',
         ])
         ->assertRedirect(route('admin.services'));
@@ -49,6 +62,11 @@ test('inactive services stay hidden from the website', function () {
     $this->get(route('service'))
         ->assertOk()
         ->assertDontSee('Hidden UX Review');
+
+    $service = Service::where('title', 'Hidden UX Review')->firstOrFail();
+
+    $this->get(route('service.show', $service))
+        ->assertNotFound();
 });
 
 test('admin can update and delete services', function () {
@@ -57,6 +75,9 @@ test('admin can update and delete services', function () {
         'title' => 'Legacy Service',
         'image_url' => 'img/carousel-1.jpg',
         'short_description' => 'Old service text.',
+        'detail_overview' => 'Old service detail text.',
+        'included_services' => ['Old planning item'],
+        'delivery_steps' => ['Old delivery step'],
         'is_active' => true,
     ]);
 
@@ -65,6 +86,9 @@ test('admin can update and delete services', function () {
             'title' => 'Updated Service',
             'image_url' => 'img/carousel-2.jpg',
             'short_description' => 'Updated service description.',
+            'detail_overview' => 'Updated detail overview for the service page.',
+            'included_services_text' => "Updated discovery\nUpdated implementation",
+            'delivery_steps_text' => "Confirm scope\nDeliver update",
             'is_active' => '0',
         ])
         ->assertRedirect(route('admin.services'))
@@ -73,6 +97,7 @@ test('admin can update and delete services', function () {
     $this->assertDatabaseHas('services', [
         'id' => $service->id,
         'title' => 'Updated Service',
+        'detail_overview' => 'Updated detail overview for the service page.',
         'is_active' => false,
     ]);
 

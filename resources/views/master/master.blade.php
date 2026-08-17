@@ -2,6 +2,8 @@
     $pageKey = $pageKey ?? 'home';
     $pageTitle = $pageTitle ?? 'Startup';
     $pagesMenuActive = in_array($pageKey, ['feature', 'team', 'testimonial', 'booking'], true);
+    $popularServices = collect($activeServices ?? [])->take(3);
+    $bookNowUrl = $pageKey === 'home' ? '#booking-section' : route('booking');
 @endphp
 
 <!DOCTYPE html>
@@ -40,8 +42,8 @@
             <div class="col-lg-8 text-center text-lg-start mb-2 mb-lg-0">
                 <div class="d-inline-flex align-items-center" style="height: 45px;">
                     <small class="me-3 text-light"><i class="fa fa-map-marker-alt me-2"></i>123 Street, New York, USA</small>
-                    <small class="me-3 text-light"><i class="fa fa-phone-alt me-2"></i>+012 345 6789</small>
-                    <small class="text-light"><i class="fa fa-envelope-open me-2"></i>info@example.com</small>
+                    <small class="me-3 text-light"><i class="fa fa-phone-alt me-2"></i><a href="tel:+8801701074419" class="text-light">+880 1701 074419</a></small>
+                    <small class="text-light"><i class="fa fa-envelope-open me-2"></i><a href="mailto:support@startupitbd.com" class="text-light">support@startupitbd.com</a></small>
                 </div>
             </div>
             <div class="col-lg-4 text-center text-lg-end">
@@ -101,7 +103,7 @@
                     @endauth
                 </div>
                 <button type="button" class="btn text-primary ms-3" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fa fa-search"></i></button>
-                <a href="{{ route('booking') }}" class="btn btn-primary py-2 px-4 ms-3">Book Now</a>
+                <a href="{{ $bookNowUrl }}" class="btn btn-primary py-2 px-4 ms-3">Book Now</a>
             </div>
         </nav>
 
@@ -168,11 +170,11 @@
                             </div>
                             <div class="d-flex mb-2">
                                 <i class="bi bi-envelope-open text-primary me-2"></i>
-                                <p class="mb-0">info@example.com</p>
+                                <p class="mb-0"><a href="mailto:support@startupitbd.com" class="text-light">support@startupitbd.com</a></p>
                             </div>
                             <div class="d-flex mb-2">
                                 <i class="bi bi-telephone text-primary me-2"></i>
-                                <p class="mb-0">+012 345 67890</p>
+                                <p class="mb-0"><a href="tel:+8801701074419" class="text-light">+880 1701 074419</a></p>
                             </div>
                             <div class="d-flex mt-4">
                                 <a class="btn btn-primary btn-square me-2" href="#"><i class="fab fa-twitter fw-normal"></i></a>
@@ -200,9 +202,11 @@
                             </div>
                             <div class="link-animated d-flex flex-column justify-content-start">
                                 <a class="text-light mb-2" href="{{ route('feature') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Our Features</a>
-                                <a class="text-light mb-2" href="{{ route('service') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Cyber Security</a>
-                                <a class="text-light mb-2" href="{{ route('service') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Web Development</a>
-                                <a class="text-light mb-2" href="{{ route('service') }}"><i class="bi bi-arrow-right text-primary me-2"></i>App Development</a>
+                                @forelse ($popularServices as $popularService)
+                                    <a class="text-light mb-2" href="{{ route('service.show', $popularService) }}"><i class="bi bi-arrow-right text-primary me-2"></i>{{ $popularService->title }}</a>
+                                @empty
+                                    <a class="text-light mb-2" href="{{ route('service') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Our Services</a>
+                                @endforelse
                                 <a class="text-light mb-2" href="{{ route('testimonial') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Testimonials</a>
                                 <a class="text-light" href="{{ route('booking') }}"><i class="bi bi-arrow-right text-primary me-2"></i>Booking</a>
                             </div>

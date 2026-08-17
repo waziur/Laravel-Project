@@ -15,7 +15,7 @@
                         </div>
                         <div class="ps-4">
                             <h5 class="mb-2">Call to ask any question</h5>
-                            <h4 class="text-primary mb-0">+012 345 6789</h4>
+                            <h4 class="text-primary mb-0"><a href="tel:+8801701074419">+880 1701 074419</a></h4>
                         </div>
                     </div>
                 </div>
@@ -26,7 +26,7 @@
                         </div>
                         <div class="ps-4">
                             <h5 class="mb-2">Email for booking support</h5>
-                            <h4 class="text-primary mb-0">info@example.com</h4>
+                            <h4 class="text-primary mb-0"><a href="mailto:support@startupitbd.com">support@startupitbd.com</a></h4>
                         </div>
                     </div>
                 </div>

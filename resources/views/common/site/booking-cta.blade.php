@@ -1,4 +1,4 @@
-<div class="container-fluid py-5 wow fadeInUp" data-wow-delay="0.1s">
+<div id="booking-section" class="container-fluid py-5 wow fadeInUp" data-wow-delay="0.1s">
     <div class="container py-5">
         <div class="row g-5">
             <div class="col-lg-7">
@@ -21,7 +21,7 @@
                     </div>
                     <div class="ps-4">
                         <h5 class="mb-2">Call to ask any question</h5>
-                        <h4 class="text-primary mb-0">+012 345 6789</h4>
+                        <h4 class="text-primary mb-0"><a href="tel:+8801701074419">+880 1701 074419</a></h4>
                     </div>
                 </div>
             </div>

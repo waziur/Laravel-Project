@@ -9,7 +9,7 @@
                     <div class="p-3" style="max-width: 900px;">
                         <h5 class="text-white text-uppercase mb-3 animated slideInDown">Creative & Innovative</h5>
                         <h1 class="display-1 text-white mb-md-4 animated zoomIn">Creative & Innovative Digital Solution</h1>
-                        <a href="{{ route('booking') }}" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Book A Service</a>
+                        <a href="{{ route('service') }}" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Explore Services</a>
                         <a href="{{ route('contact') }}" class="btn btn-outline-light py-md-3 px-md-5 animated slideInRight">Contact Us</a>
                     </div>
                 </div>
@@ -21,7 +21,7 @@
                         <h5 class="text-white text-uppercase mb-3 animated slideInDown">Plan, Build, Secure</h5>
                         <h1 class="display-1 text-white mb-md-4 animated zoomIn">Reliable IT Services For Growing Teams</h1>
                         <a href="{{ route('service') }}" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Our Services</a>
-                        <a href="{{ route('booking') }}" class="btn btn-outline-light py-md-3 px-md-5 animated slideInRight">Book Now</a>
+                        <a href="{{ route('feature') }}" class="btn btn-outline-light py-md-3 px-md-5 animated slideInRight">Why Choose Us</a>
                     </div>
                 </div>
             </div>

@@ -23,10 +23,10 @@
                     </div>
                     <div class="ps-4">
                         <h5 class="mb-2">Call to ask any question</h5>
-                        <h4 class="text-primary mb-0">+012 345 6789</h4>
+                        <h4 class="text-primary mb-0"><a href="tel:+8801701074419">+880 1701 074419</a></h4>
                     </div>
                 </div>
-                <a href="{{ route('booking') }}" class="btn btn-primary py-3 px-5 mt-3 wow zoomIn" data-wow-delay="0.9s">Book A Service</a>
+                <a href="{{ route('service') }}" class="btn btn-primary py-3 px-5 mt-3 wow zoomIn" data-wow-delay="0.9s">Explore Services</a>
             </div>
             <div class="col-lg-5" style="min-height: 500px;">
                 <div class="position-relative h-100">

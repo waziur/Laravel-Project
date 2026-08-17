@@ -6,12 +6,16 @@ use App\Models\Booking;
 use App\Models\ContactMessage;
 use App\Models\Service;
 use App\Models\User;
+use App\Services\BookingSchedule;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
@@ -41,7 +45,8 @@ class AdminController extends Controller
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('title', 'like', "%{$search}%")
-                        ->orWhere('short_description', 'like', "%{$search}%");
+                        ->orWhere('short_description', 'like', "%{$search}%")
+                        ->orWhere('detail_overview', 'like', "%{$search}%");
                 });
             })
             ->latest()
@@ -132,15 +137,40 @@ class AdminController extends Controller
         ]);
     }
 
-    public function updateBookingStatus(Request $request, Booking $booking): RedirectResponse
-    {
+    public function updateBookingStatus(
+        Request $request,
+        Booking $booking,
+        BookingSchedule $schedule
+    ): RedirectResponse {
         $validated = $request->validate([
             'status' => ['required', Rule::in(array_keys(Booking::statuses()))],
         ]);
 
-        $booking->update([
-            'status' => $validated['status'],
-        ]);
+        if (
+            Booking::blocksSlot($validated['status'])
+            && $schedule->slotKey($booking->preferred_date, $booking->preferred_time) !== null
+            && ! $schedule->isAvailable(
+                $booking->preferred_date,
+                $booking->preferred_time,
+                $booking->id
+            )
+        ) {
+            throw ValidationException::withMessages([
+                'status' => 'This booking cannot be reactivated because its time is no longer available.',
+            ]);
+        }
+
+        try {
+            DB::transaction(function () use ($booking, $validated): void {
+                $booking->update([
+                    'status' => $validated['status'],
+                ]);
+            });
+        } catch (UniqueConstraintViolationException) {
+            throw ValidationException::withMessages([
+                'status' => 'This booking cannot be reactivated because its time is no longer available.',
+            ]);
+        }
 
         return redirect()
             ->route('admin.bookings')
@@ -394,18 +424,53 @@ class AdminController extends Controller
     }
 
     /**
-     * @return array{title: string, image_url: string, short_description: string, is_active: bool}
+     * @return array{title: string, image_url: string, short_description: string, detail_overview: string, included_services: array<int, string>, delivery_steps: array<int, string>, is_active: bool}
      */
     private function validatedServiceData(Request $request): array
     {
+        $request->merge([
+            'title' => $this->trimStringInput($request, 'title'),
+            'image_url' => $this->trimStringInput($request, 'image_url'),
+            'short_description' => $this->trimStringInput($request, 'short_description'),
+            'detail_overview' => $this->trimStringInput($request, 'detail_overview'),
+            'included_services_text' => $this->trimStringInput($request, 'included_services_text'),
+            'delivery_steps_text' => $this->trimStringInput($request, 'delivery_steps_text'),
+        ]);
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:120'],
             'image_url' => ['required', 'string', 'max:500'],
             'short_description' => ['required', 'string', 'max:500'],
+            'detail_overview' => ['required', 'string', 'max:2000'],
+            'included_services_text' => ['required', 'string', 'max:3000'],
+            'delivery_steps_text' => ['required', 'string', 'max:3000'],
         ]);
 
+        $validated['included_services'] = $this->linesFromText($validated['included_services_text']);
+        $validated['delivery_steps'] = $this->linesFromText($validated['delivery_steps_text']);
         $validated['is_active'] = $request->boolean('is_active');
 
+        unset($validated['included_services_text'], $validated['delivery_steps_text']);
+
         return $validated;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function linesFromText(string $value): array
+    {
+        return collect(preg_split('/\R/', $value) ?: [])
+            ->map(fn (string $line): string => trim($line))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    private function trimStringInput(Request $request, string $key): mixed
+    {
+        $value = $request->input($key);
+
+        return is_string($value) ? trim($value) : $value;
     }
 }

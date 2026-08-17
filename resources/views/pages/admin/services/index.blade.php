@@ -47,6 +47,11 @@
                             <td>{{ $service->created_at?->format('M d, Y') ?? 'N/A' }}</td>
                             <td>
                                 <div class="panel-row-actions">
+                                    @if ($service->is_active)
+                                        <a href="{{ route('service.show', $service) }}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fa fa-eye me-1"></i>View
+                                        </a>
+                                    @endif
                                     <a href="{{ route('admin.services.edit', $service) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="fa fa-edit me-1"></i>Edit
                                     </a>

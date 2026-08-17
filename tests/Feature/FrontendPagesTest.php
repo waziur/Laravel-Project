@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Booking;
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -53,9 +54,14 @@ test('authenticated users can view the booking form', function () {
         ->assertSee('Book A Service')
         ->assertSee('name="name"', false)
         ->assertSee('name="email"', false)
-        ->assertDontSee('value="Account Holder"', false)
-        ->assertDontSee('value="account@example.com"', false)
-        ->assertSee('name="service"', false);
+        ->assertSee('value="Account Holder"', false)
+        ->assertSee('value="account@example.com"', false)
+        ->assertSee('name="service"', false)
+        ->assertSee('name="preferred_time"', false)
+        ->assertSee('data-booking-time-picker', false)
+        ->assertSee('data-booking-time-value="09:00 AM"', false)
+        ->assertSee('data-booking-time-value="09:15 AM"', false)
+        ->assertSee('data-booking-time-value="06:00 PM"', false);
 });
 
 test('guest users see embedded booking login prompts on public pages', function () {
@@ -64,6 +70,17 @@ test('guest users see embedded booking login prompts on public pages', function 
         ->assertSee('Book A Service')
         ->assertSee('Login required for booking')
         ->assertDontSee('name="service"', false);
+});
+
+test('active service detail pages show full service information', function () {
+    $service = Service::where('title', 'Web Development')->firstOrFail();
+
+    $this->get(route('service.show', $service))
+        ->assertOk()
+        ->assertSee('Web Development')
+        ->assertSee('Specific services included in Web Development')
+        ->assertSee('Laravel application modules')
+        ->assertSee('How this service is completed');
 });
 
 test('booking form accepts valid requests from authenticated users', function () {

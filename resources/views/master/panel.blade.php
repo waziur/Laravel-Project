@@ -68,27 +68,9 @@
                     @else
                         <a href="{{ route('user.bookings') }}" class="panel-link {{ request()->routeIs('user.bookings') ? 'active' : '' }}">
                             <i class="fa fa-calendar-check"></i>
-                            <span>Bookings</span>
+                            <span>My Bookings</span>
                         </a>
                     @endif
-                </nav>
-            </div>
-
-            <div class="panel-nav-block">
-                <span class="panel-nav-label">Website</span>
-                <nav class="panel-nav">
-                    <a href="{{ route('booking') }}" class="panel-link">
-                        <i class="fa fa-calendar-plus"></i>
-                        <span>Booking</span>
-                    </a>
-                    <a href="{{ route('service') }}" class="panel-link">
-                        <i class="fa fa-cubes"></i>
-                        <span>Services</span>
-                    </a>
-                    <a href="{{ route('contact') }}" class="panel-link">
-                        <i class="fa fa-headset"></i>
-                        <span>Contact</span>
-                    </a>
                 </nav>
             </div>
 
@@ -117,12 +99,25 @@
                     <span class="panel-subtitle">Welcome back, {{ $currentUser->name }}</span>
                 </div>
                 <div class="panel-topbar-actions">
-                    <a href="{{ route('booking') }}" class="panel-icon-action" title="Booking">
-                        <i class="fa fa-calendar-plus"></i>
-                    </a>
-                    <a href="{{ route('home') }}" class="btn btn-outline-primary">
-                        <i class="fa fa-globe me-2"></i>View Site
-                    </a>
+                    <div class="dropdown panel-site-menu">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="panelWebsiteMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-globe me-2"></i>Website
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end panel-site-dropdown" aria-labelledby="panelWebsiteMenu">
+                            <a href="{{ route('home') }}" class="dropdown-item">
+                                <i class="fa fa-home"></i>
+                                <span>View Site</span>
+                            </a>
+                            <a href="{{ route('service') }}" class="dropdown-item">
+                                <i class="fa fa-cubes"></i>
+                                <span>Services</span>
+                            </a>
+                            <a href="{{ route('contact') }}" class="dropdown-item">
+                                <i class="fa fa-headset"></i>
+                                <span>Contact</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </header>
 

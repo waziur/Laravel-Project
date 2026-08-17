@@ -56,6 +56,19 @@ test('submitted bookings stay pending until an admin changes status', function (
 
     $this->actingAs($admin)
         ->patch(route('admin.bookings.status', $booking), [
+            'status' => Booking::STATUS_COMPLETED,
+        ])
+        ->assertRedirect(route('admin.bookings'))
+        ->assertSessionHas('status', 'Booking status updated to completed.');
+
+    $this->assertDatabaseHas('bookings', [
+        'id' => $booking->id,
+        'status' => Booking::STATUS_COMPLETED,
+        'slot_key' => null,
+    ]);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.bookings.status', $booking), [
             'status' => Booking::STATUS_REJECTED,
         ])
         ->assertRedirect(route('admin.bookings'))

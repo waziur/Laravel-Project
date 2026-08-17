@@ -10,6 +10,7 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'home')->name('home');
     Route::get('/about', 'about')->name('about');
     Route::get('/service', 'service')->name('service');
+    Route::get('/service/{service}', 'serviceDetails')->whereNumber('service')->name('service.show');
     Route::get('/feature', 'feature')->name('feature');
     Route::get('/team', 'team')->name('team');
     Route::get('/testimonial', 'testimonial')->name('testimonial');
@@ -21,6 +22,7 @@ Route::controller(FrontendController::class)->group(function () {
 Route::controller(FrontendController::class)
     ->middleware('booking.auth')
     ->group(function () {
+        Route::get('/booking/availability', 'bookingAvailability')->name('booking.availability');
         Route::post('/booking', 'storeBooking')->name('booking.store');
     });
 

@@ -21,7 +21,7 @@
                         </div>
                         <h4 class="mb-3">{{ $service->title }}</h4>
                         <p class="m-0">{{ $service->short_description }}</p>
-                        <a class="btn btn-lg btn-primary rounded" href="{{ route('booking') }}"><i class="bi bi-arrow-right"></i></a>
+                        <a class="btn btn-lg btn-primary rounded" href="{{ route('service.show', $service) }}" aria-label="View {{ $service->title }} details"><i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             @empty
@@ -35,9 +35,11 @@
 
             <div class="col-lg-4 col-md-6 wow zoomIn" data-wow-delay="0.9s">
                 <div class="position-relative bg-primary rounded h-100 d-flex flex-column align-items-center justify-content-center text-center p-5">
-                    <h3 class="text-white mb-3">Book A Service</h3>
-                    <p class="text-white mb-3">Tell us what you want to build or improve. We will help you shape the next move.</p>
-                    <h2 class="text-white mb-0">+012 345 6789</h2>
+                    <h3 class="text-white mb-3">Need Help Choosing?</h3>
+                    <p class="text-white mb-4">Not sure which service fits your project? Talk to the team before sending a booking request.</p>
+                    <a href="{{ route('contact') }}" class="btn btn-light py-3 px-4">
+                        <i class="fa fa-headset me-2"></i>Contact Team
+                    </a>
                 </div>
             </div>
         </div>

@@ -73,16 +73,19 @@
                                             $buttonClass = match ($value) {
                                                 'accepted' => 'btn-outline-success',
                                                 'rejected' => 'btn-outline-danger',
+                                                'completed' => 'btn-outline-primary',
                                                 default => 'btn-outline-secondary',
                                             };
                                             $buttonIcon = match ($value) {
                                                 'accepted' => 'fa-check',
                                                 'rejected' => 'fa-times',
+                                                'completed' => 'fa-flag-checkered',
                                                 default => 'fa-clock',
                                             };
                                             $buttonLabel = match ($value) {
                                                 'accepted' => 'Accept',
                                                 'rejected' => 'Reject',
+                                                'completed' => 'Complete',
                                                 default => 'Pending',
                                             };
                                         @endphp

@@ -4,6 +4,8 @@
         ? $imageValue
         : asset($imageValue);
     $activeValue = old('is_active', $service->exists ? (string) (int) $service->is_active : '1');
+    $includedServicesText = old('included_services_text', implode(PHP_EOL, $service->includedServiceList()));
+    $deliveryStepsText = old('delivery_steps_text', implode(PHP_EOL, $service->deliveryStepList()));
 @endphp
 
 <form action="{{ $action }}" method="post" class="service-admin-form">
@@ -35,6 +37,33 @@
                 <label for="short_description" class="form-label">Short Description</label>
                 <textarea id="short_description" name="short_description" rows="5" class="form-control @error('short_description') is-invalid @enderror" required>{{ old('short_description', $service->short_description) }}</textarea>
                 @error('short_description')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="detail_overview" class="form-label">Detail Overview</label>
+                <textarea id="detail_overview" name="detail_overview" rows="6" class="form-control @error('detail_overview') is-invalid @enderror" required>{{ old('detail_overview', $service->detail_overview) }}</textarea>
+                <small class="text-muted">This appears at the top of the single service detail page.</small>
+                @error('detail_overview')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="included_services_text" class="form-label">Specific Services Provided</label>
+                <textarea id="included_services_text" name="included_services_text" rows="6" class="form-control @error('included_services_text') is-invalid @enderror" required>{{ $includedServicesText }}</textarea>
+                <small class="text-muted">Write one specific service per line.</small>
+                @error('included_services_text')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="delivery_steps_text" class="form-label">Delivery Process Steps</label>
+                <textarea id="delivery_steps_text" name="delivery_steps_text" rows="6" class="form-control @error('delivery_steps_text') is-invalid @enderror" required>{{ $deliveryStepsText }}</textarea>
+                <small class="text-muted">Write one process step per line.</small>
+                @error('delivery_steps_text')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>

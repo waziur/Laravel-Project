@@ -25,7 +25,7 @@
         </article>
         <article class="panel-card">
             <span class="panel-card-icon bg-info"><i class="fa fa-calendar-check"></i></span>
-            <p class="panel-card-label">Bookings</p>
+            <p class="panel-card-label">My Bookings</p>
             <h3>{{ $bookingCount }}</h3>
         </article>
     </section>
