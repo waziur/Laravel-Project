@@ -12,6 +12,32 @@ Administrators can manage services, review bookings, update booking statuses, vi
 
 The project demonstrates practical implementation of Laravel MVC architecture, authentication, middleware, relational database design, validation, role-based access control, responsive interfaces, and automated testing.
 
+## Project Screenshots
+
+### Home Page
+
+<p align="center">
+  <img src="docs/screenshots/home-page.png" alt="Startup Home Page" width="900">
+</p>
+
+### Service Booking Form
+
+<p align="center">
+  <img src="docs/screenshots/booking-form.png" alt="Service Booking Form" width="420">
+</p>
+
+### User Booking History
+
+<p align="center">
+  <img src="docs/screenshots/user-bookings.png" alt="User Booking History" width="900">
+</p>
+
+### Admin Booking Management
+
+<p align="center">
+  <img src="docs/screenshots/admin-bookings.png" alt="Admin Booking Management" width="850">
+</p>
+
 ## Main Features
 
 ### Public Website
